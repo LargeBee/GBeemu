@@ -1,0 +1,41 @@
+#pragma once
+#include <cstdint>
+
+class Cartridge;
+class PPU;
+class Timer;
+class DMA;
+class APU;
+class Input;
+
+class Bus
+{
+public:
+	Bus(
+		Cartridge& cartridge,
+		PPU& ppu,
+		Timer& timer,
+		DMA& dma,
+		APU& apu,
+		Input& input
+	);
+
+	void reset();
+
+	uint8_t read(uint16_t address);
+	void write(uint16_t address, uint8_t value);
+
+private:
+	Cartridge& cartridge;
+	PPU& ppu;
+	Timer& timer;
+	DMA& dma;
+	APU& apu;
+	Input& input;
+
+	uint8_t wram[0x2000];
+	uint8_t hram[0x7F];
+
+	uint8_t interruptEnable;
+	uint8_t interruptFlags;
+};
