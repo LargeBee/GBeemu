@@ -1,16 +1,38 @@
 #include "CPU.h"
+#include "Emulator.h"
+#include "Bus.h"
 
 CPU::CPU(Emulator& emulator, Bus& bus)
 	: emulator(emulator),
 	bus(bus)
 {
-	for (int i = 0; i < 0x100; i++)
-	{
-		instructions[i] = { "UNIMPL", nullptr, 0, 0 };
-		cbInstructions[i] = { "CB-UNIMPL", nullptr, 0, 0 };
-	}
+	reset();
 
 	buildInstructionTables();
+}
+
+void CPU::reset()
+{
+	A = 0;
+	F = 0;
+
+	B = 0;
+	C = 0;
+
+	D = 0;
+	E = 0;
+
+	H = 0;
+	L = 0;
+
+	PC = 0;
+	SP = 0;
+
+	ime = false;
+	halted = false;
+	stopped = false;
+
+	opcode = 0;
 }
 
 void CPU::tick()

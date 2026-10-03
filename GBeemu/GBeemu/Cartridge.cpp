@@ -219,6 +219,24 @@ void Cartridge::writeROM(uint16_t address, uint8_t value)
 	}
 }
 
+void Cartridge::writeRAM(uint16_t address, uint8_t value)
+{
+	if (!ramEnable)
+		return;
+
+	if (ram.empty())
+		return;
+
+	uint32_t offset =
+		(ramBank * 0x2000) +
+		(address - 0xA000);
+
+	if (offset >= ram.size())
+		return;
+
+	ram[offset] = value;
+}
+
 bool Cartridge::isLoaded() const
 {
 	return !rom.empty();

@@ -11,8 +11,9 @@ class Input;
 class Bus
 {
 public:
-	Bus(
-		Cartridge& cartridge,
+	Bus(Cartridge& cartridge);
+
+	void connect(
 		PPU& ppu,
 		Timer& timer,
 		DMA& dma,
@@ -25,13 +26,15 @@ public:
 	uint8_t read(uint16_t address);
 	void write(uint16_t address, uint8_t value);
 
+	void requestInterrupt(uint8_t bit);
+
 private:
 	Cartridge& cartridge;
-	PPU& ppu;
-	Timer& timer;
-	DMA& dma;
-	APU& apu;
-	Input& input;
+	PPU* ppu;
+	Timer* timer;
+	DMA* dma;
+	APU* apu;
+	Input* input;
 
 	uint8_t wram[0x2000];
 	uint8_t hram[0x7F];

@@ -2,11 +2,12 @@
 
 #include "Bus.h"
 #include "CPU.h"
-//#include "PPU.h"
-//#include "timer.h"
-//#include "DMA.h"
-//#include "APU.h"
+#include "PPU.h"
+#include "Timer.h"
+#include "DMA.h"
+#include "APU.h"
 #include "Cartridge.h"
+#include "Input.h"
 
 Emulator::Emulator()
 {
@@ -14,11 +15,29 @@ Emulator::Emulator()
 	running = false;
 
 	cartridge = new Cartridge();
+	
+	ppu = new PPU();
+	timer = new Timer();
+	dma = new DMA();
+	apu = new APU();
+	input = new Input();
+
 	bus = new Bus(*cartridge);
-	ppu = new PPU(*bus);
-	timer = new Timer(*bus);
-	dma = new DMA(*bus);
-	apu = new APU(*bus);
+
+	bus->connect(
+		*ppu,
+		*timer,
+		*dma,
+		*apu,
+		*input
+	);
+
+	ppu->setBus(*bus);
+	timer->setBus(*bus);
+	dma->setBus(*bus);
+	apu->setBus(*bus);
+	input->setBus(*bus);
+
 	cpu = new CPU(*this, *bus);
 }
 
@@ -53,6 +72,7 @@ void Emulator::tick()
 	timer->tick();
 	dma->tick();
 	apu->tick();
+	input->tick();
 
 	cycles++;
 }

@@ -1,7 +1,13 @@
 #include "CPU.h"
 #include "Instruction.h"
 
-void CPU::buildInstructionTable()
+void CPU::buildInstructionTables()
 {
-	instructions[0x00] = { "NOP", &CPU::NOP, 1, 4 };
+	for (int i = 0; i < 0x100; i++)
+	{
+		instructions[i] = { "UNIMPL", nullptr, 0, 0 };
+		cbInstructions[i] = { "CB-UNIMPL", nullptr, 0, 0 };
+	}
+
+	//instructions[0x00] = { "NOP", &CPU::NOP, 1, 4 };
 }

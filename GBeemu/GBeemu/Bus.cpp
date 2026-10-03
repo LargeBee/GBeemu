@@ -1,28 +1,30 @@
 #include "Bus.h"
 
 #include "Cartridge.h"
-//#include "PPU.h"
-//#include "Timer.h"
-//#include "DMA.h"
-//#include "APU.h"
-//#include "Input.h"
+#include "PPU.h"
+#include "Timer.h"
+#include "DMA.h"
+#include "APU.h"
+#include "Input.h"
 
-Bus::Bus(
-	Cartridge& cartridge,
-	PPU& ppu,
-	Timer& timer,
-	DMA& dma,
-	APU& apu,
-	Input& input
-)
-	: cartridge(cartridge),
-	ppu(ppu),
-	timer(timer),
-	dma(dma),
-	apu(apu),
-	input(input)
+Bus::Bus(Cartridge& cartridge) : cartridge(cartridge)
 {
+	ppu = nullptr;
+	timer = nullptr;
+	dma = nullptr;
+	apu = nullptr;
+	input = nullptr;
+
 	reset();
+}
+
+void Bus::connect(PPU& ppu, Timer& timer, DMA& dma, APU& apu, Input& input)
+{
+	this->ppu = &ppu;
+	this->timer = &timer;
+	this->dma = &dma;
+	this->apu = &apu;
+	this->input = &input;
 }
 
 void Bus::reset()
@@ -45,7 +47,7 @@ uint8_t Bus::read(uint16_t address)
 
 	// VRAM
 	if (address >= 0x8000 && address <= 0x9FFF)
-		return ppu.readVRAM(address - 0x8000);
+		return ppu->read(address - 0x8000);
 
 	// Cartridge RAM
 	if (address >= 0xA000 && address <= 0xBFFF)
@@ -61,7 +63,7 @@ uint8_t Bus::read(uint16_t address)
 
 	// OAM
 	if (address >= 0xFE00 && address <= 0xFE9F)
-		return ppu.readOAM(address - 0xFE00);
+		return ppu->read(address - 0xFE00);
 
 	// Unusable memory
 	if (address >= 0xFEA0 && address <= 0xFEFF)
@@ -73,13 +75,13 @@ uint8_t Bus::read(uint16_t address)
 		switch (address)
 		{
 		case 0xFF00:
-			return input.read();
+			return input->read();
 
 		case 0xFF04:
 		case 0xFF05:
 		case 0xFF06:
 		case 0xFF07:
-			return timer.read(address);
+			return timer->read(address);
 
 		case 0xFF0F:
 			return interruptFlags;
@@ -106,7 +108,7 @@ uint8_t Bus::read(uint16_t address)
 		case 0xFF24:
 		case 0xFF25:
 		case 0xFF26:
-			return apu.read(address);
+			return apu->read(address);
 
 		case 0xFF40:
 		case 0xFF41:
@@ -119,7 +121,7 @@ uint8_t Bus::read(uint16_t address)
 		case 0xFF49:
 		case 0xFF4A:
 		case 0xFF4B:
-			return ppu.readRegister(address);
+			return ppu->read(address);
 
 		default:
 			return 0xFF;
@@ -149,7 +151,7 @@ void Bus::write(uint16_t address, uint8_t value)
 	// VRAM
 	if (address >= 0x8000 && address <= 0x9FFF)
 	{
-		ppu.writeVRAM(address, value);
+		ppu->write(address, value);
 		return;
 	}
 
@@ -177,7 +179,7 @@ void Bus::write(uint16_t address, uint8_t value)
 	// OAM
 	if (address >= 0xFE00 && address <= 0xFE9F)
 	{
-		ppu.writeOAM(address, value);
+		ppu->write(address, value);
 		return;
 	}
 
@@ -191,14 +193,14 @@ void Bus::write(uint16_t address, uint8_t value)
 		switch (address)
 		{
 		case 0xFF00:
-			input.write(value);
+			input->write(value);
 			return;
 
 		case 0xFF04:
 		case 0xFF05:
 		case 0xFF06:
 		case 0xFF07:
-			timer.write(address, value);
+			timer->write(address, value);
 			return;
 
 		case 0xFF0F:
@@ -227,7 +229,7 @@ void Bus::write(uint16_t address, uint8_t value)
 		case 0xFF24:
 		case 0xFF25:
 		case 0xFF26:
-			apu.write(address, value);
+			apu->write(address, value);
 			return;
 
 		case 0xFF40:
@@ -241,7 +243,7 @@ void Bus::write(uint16_t address, uint8_t value)
 		case 0xFF49:
 		case 0xFF4A:
 		case 0xFF4B:
-			ppu.writeRegister(address, value);
+			ppu->write(address, value);
 			return;
 
 		default:
@@ -262,4 +264,9 @@ void Bus::write(uint16_t address, uint8_t value)
 		interruptEnable = value;
 		return;
 	}
+}
+
+void Bus::requestInterrupt(uint8_t bit)
+{
+	interruptFlags |= (1 << bit);
 }

@@ -4,7 +4,7 @@ int main()
 {
 	Emulator emulator;
 
-	if (!emulator.loadROM("pokemon.gb"))
+	if (!emulator.loadROM("D:\DEV\EmulatorRoms\pokered.gb"))
 	{
 		return 1;
 	}

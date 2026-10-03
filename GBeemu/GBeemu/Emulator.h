@@ -1,5 +1,6 @@
 #pragma once
 #include <cstdint>
+#include <string>
 
 class Bus;
 class CPU;
@@ -8,6 +9,7 @@ class Timer;
 class DMA;
 class APU;
 class Cartridge;
+class Input;
 
 class Emulator
 {
@@ -52,6 +54,7 @@ private:
 	Timer* timer;
 	DMA* dma;
 	APU* apu;
+	Input* input;
 
 	uint64_t cycles;
 	bool running;
