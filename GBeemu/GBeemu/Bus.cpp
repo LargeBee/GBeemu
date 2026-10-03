@@ -1,6 +1,6 @@
 #include "Bus.h"
 
-//#include "Cartridge.h"
+#include "Cartridge.h"
 //#include "PPU.h"
 //#include "Timer.h"
 //#include "DMA.h"

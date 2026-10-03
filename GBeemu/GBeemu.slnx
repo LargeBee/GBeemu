@@ -3,5 +3,5 @@
     <Platform Name="x64" />
     <Platform Name="x86" />
   </Configurations>
-  <Project Path="GBeemu/GBeemu.vcxproj" />
+  <Project Path="GBeemu/GBeemu.vcxproj" Id="0c8afe6c-cc82-4625-a7be-53a01387f751" />
 </Solution>

@@ -6,7 +6,7 @@
 //#include "timer.h"
 //#include "DMA.h"
 //#include "APU.h"
-//#include "Cartridge.h"
+#include "Cartridge.h"
 
 Emulator::Emulator()
 {
@@ -142,3 +142,12 @@ uint64_t Emulator::getCycles() const
 	return cycles;
 }
 
+bool Emulator::loadROM(const std::string& path)
+{
+	if (!cartridge->loadROM(path))
+		return false;
+
+	reset();
+
+	return true;
+}

@@ -15,6 +15,8 @@ public:
 	Emulator();
 	~Emulator();
 
+	bool loadROM(const std::string& path);
+
 	void reset();
 
 	//Master clock
