@@ -2,6 +2,7 @@
 #include <cstdint>
 
 #include "Instruction.h"
+#include "TraceEntry.h"
 
 class Emulator;
 class Bus;
@@ -16,7 +17,8 @@ public:
 
 	//Execution
 	void step();
-	void tick();
+	void tick(uint8_t cycles);
+	void tickM(uint8_t cycles);
 	void idle();
 
 	//Memory Access
@@ -26,6 +28,8 @@ public:
 	//Instruction Fetching
 	uint8_t fetch8();
 	uint16_t fetch16();
+
+	const TraceEntry& getLastTrace() const;
 	
 private:
 	Emulator& emulator;
@@ -52,6 +56,14 @@ private:
 	bool halted;
 	bool stopped;
 
+	TraceEntry lastTrace;
+
+	void createTrace(
+		uint16_t pc,
+		uint8_t opcode,
+		const Instruction& instruction
+	);
+
 	//Current instruction
 	uint8_t opcode;
 
@@ -67,4 +79,9 @@ private:
 
 	//Instructions
 	void NOP();
+
+
+	//LD rr,d16
+	void LD_BC_d16();
+	void LD_SP_d16();
 };

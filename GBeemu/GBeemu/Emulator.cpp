@@ -77,6 +77,54 @@ void Emulator::tick()
 	cycles++;
 }
 
+void Emulator::update()
+{
+	if (!running)
+		return;
+
+	stepInstruction();
+}
+
+void Emulator::stepInstruction()
+{
+	cpu->step();
+
+	trace.push_back(
+		cpu->getLastTrace()
+	);
+
+	if (trace.size() > 100)
+	{
+		trace.erase(trace.begin());
+	}
+}
+
+const std::vector<TraceEntry>& Emulator::getTrace() const
+{
+	return trace;
+}
+
+void Emulator::clearTrace()
+{
+	trace.clear();
+}
+
+bool Emulator::runBoot()
+{
+	reset();
+
+	if (!bus->loadBootROM("dmg_boot.bin"))
+	{
+		return false;
+	}
+
+	bus->enableBootROM();
+
+	running = true;
+
+	return true;
+}
+
 void Emulator::run()
 {
 	running = true;
@@ -90,11 +138,6 @@ void Emulator::pause()
 void Emulator::stepCycle()
 {
 	tick();
-}
-
-void Emulator::stepInstruction()
-{
-	cpu->step();
 }
 
 void Emulator::stepFrame()
@@ -167,7 +210,19 @@ bool Emulator::loadROM(const std::string& path)
 	if (!cartridge->loadROM(path))
 		return false;
 
+	if (!bus->loadBootROM("dmg_boot.bin"))
+		return false;
+
 	reset();
 
+	bus->enableBootROM();
+
+	running = true;
+
 	return true;
+}
+
+const uint8_t* Emulator::getFramebuffer() const
+{
+	return ppu->getFramebuffer();
 }

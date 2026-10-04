@@ -1,5 +1,6 @@
 #pragma once
 #include <cstdint>
+#include <string>
 
 class Cartridge;
 class PPU;
@@ -12,6 +13,11 @@ class Bus
 {
 public:
 	Bus(Cartridge& cartridge);
+
+	bool loadBootROM(const std::string& path);
+
+	void enableBootROM();
+	void disableBootROM();
 
 	void connect(
 		PPU& ppu,
@@ -30,6 +36,10 @@ public:
 
 private:
 	Cartridge& cartridge;
+
+	uint8_t bootROM[0x100];
+	bool bootROMEnabled;
+
 	PPU* ppu;
 	Timer* timer;
 	DMA* dma;

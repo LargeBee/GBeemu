@@ -1,6 +1,8 @@
 #pragma once
 #include <cstdint>
 #include <string>
+#include <vector>
+#include "TraceEntry.h"
 
 class Bus;
 class CPU;
@@ -21,11 +23,15 @@ public:
 
 	void reset();
 
+	void skipBoot();
+	bool runBoot();
+
 	//Master clock
 	void tick();
 
 	void run();
 	void pause();
+	void update();
 
 	void stepCycle();
 	void stepInstruction();
@@ -46,6 +52,12 @@ public:
 
 	uint64_t getCycles() const;
 
+	const uint8_t* getFramebuffer() const;
+
+	const std::vector<TraceEntry>& getTrace() const;
+
+	void clearTrace();
+
 private:
 	Cartridge* cartridge;
 	Bus* bus;
@@ -58,4 +70,6 @@ private:
 
 	uint64_t cycles;
 	bool running;
+
+	std::vector<TraceEntry> trace;
 };

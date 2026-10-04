@@ -1,15 +1,15 @@
-#include "Emulator.h"
+#include <SDL3/SDL_main.h>
 
-int main()
+#include "Application.h"
+
+int main(int argc, char* argv[])
 {
-	Emulator emulator;
+	Application app;
 
-	if (!emulator.loadROM("D:\DEV\EmulatorRoms\pokered.gb"))
-	{
+	if (!app.initialize())
 		return 1;
-	}
 
-	emulator.run();
+	app.run();
 
 	return 0;
 }

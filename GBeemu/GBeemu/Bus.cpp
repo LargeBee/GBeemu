@@ -7,8 +7,12 @@
 #include "APU.h"
 #include "Input.h"
 
+#include <fstream>
+
 Bus::Bus(Cartridge& cartridge) : cartridge(cartridge)
 {
+	bootROMEnabled = false;
+
 	ppu = nullptr;
 	timer = nullptr;
 	dma = nullptr;
@@ -16,6 +20,24 @@ Bus::Bus(Cartridge& cartridge) : cartridge(cartridge)
 	input = nullptr;
 
 	reset();
+}
+
+bool Bus::loadBootROM(const std::string& path)
+{
+	std::ifstream file(path, std::ios::binary);
+
+	if (!file)
+		return false;
+
+	file.read(
+		reinterpret_cast<char*>(bootROM),
+		0x100
+	);
+
+	if (file.gcount() != 0x100)
+		return false;
+
+	return true;
 }
 
 void Bus::connect(PPU& ppu, Timer& timer, DMA& dma, APU& apu, Input& input)
@@ -41,6 +63,12 @@ void Bus::reset()
 
 uint8_t Bus::read(uint16_t address)
 {
+	//Boot ROM is active
+	if (bootROMEnabled && address <= 0x00FF)
+	{
+		return bootROM[address];
+	}
+
 	// Cartridge ROM
 	if (address <= 0x7FFF)
 		return cartridge.read(address);
@@ -245,6 +273,10 @@ void Bus::write(uint16_t address, uint8_t value)
 		case 0xFF4B:
 			ppu->write(address, value);
 			return;
+		case 0xFF50:
+			if (value != 0)
+				bootROMEnabled = true;
+			return;
 
 		default:
 			return;
@@ -269,4 +301,14 @@ void Bus::write(uint16_t address, uint8_t value)
 void Bus::requestInterrupt(uint8_t bit)
 {
 	interruptFlags |= (1 << bit);
+}
+
+void Bus::enableBootROM()
+{
+	bootROMEnabled = true;
+}
+
+void Bus::disableBootROM()
+{
+	bootROMEnabled = false;
 }

@@ -35,9 +35,47 @@ void CPU::reset()
 	opcode = 0;
 }
 
-void CPU::tick()
+void CPU::tick(uint8_t cycles)
 {
-	emulator.tick();
+	for (uint8_t i = 0; i < cycles; i++)
+	{
+		emulator.tick();
+	}
+}
+
+void CPU::tickM(uint8_t cycles)
+{
+	for (uint8_t i = 0; i < cycles * 4; i++)
+	{
+		emulator.tick();
+	}
+}
+
+void CPU::createTrace(
+	uint16_t pc,
+	uint8_t opcode,
+	const Instruction& instruction
+)
+{
+	lastTrace.pc = pc;
+	lastTrace.opcode = opcode;
+
+	lastTrace.a = A;
+	lastTrace.f = F;
+
+	lastTrace.b = B;
+	lastTrace.c = C;
+
+	lastTrace.d = D;
+	lastTrace.e = E;
+
+	lastTrace.h = H;
+	lastTrace.l = L;
+
+	lastTrace.sp = SP;
+
+	lastTrace.instruction =
+		instruction.mnemonic;
 }
 
 void CPU::idle()
@@ -53,13 +91,49 @@ void CPU::step()
 		return;
 	}
 
+	uint16_t currentPC = PC;
+
 	opcode = fetch8();
+
+	tickM(1);
 
 	if (opcode == 0xCB)
 	{
 		uint8_t cbOpcode = fetch8();
 
+		tickM(1);
+
+		Instruction& instruction =
+			cbInstructions[cbOpcode];
+
+		createTrace(
+			currentPC,
+			cbOpcode,
+			instruction
+		);
+
+		if (instruction.mnemonic == "CB-UNIMPL")
+		{
+			emulator.pause();
+			return;
+		}
+
 		executeCB(cbOpcode);
+		return;
+	}
+
+	Instruction& instruction =
+		instructions[opcode];
+
+	createTrace(
+		currentPC,
+		opcode,
+		instruction
+	);
+
+	if (instruction.mnemonic == "UNIMPL")
+	{
+		emulator.pause();
 		return;
 	}
 
@@ -84,7 +158,6 @@ void CPU::executeCB(uint8_t opcode)
 
 	if (instruction.execute == nullptr)
 	{
-		// Unimplemented CB opcode
 		return;
 	}
 
@@ -112,7 +185,10 @@ uint8_t CPU::read(uint16_t address)
 {
 	uint8_t value = bus.read(address);
 
-	tick();
-
 	return value;
+}
+
+const TraceEntry& CPU::getLastTrace() const
+{
+	return lastTrace;
 }

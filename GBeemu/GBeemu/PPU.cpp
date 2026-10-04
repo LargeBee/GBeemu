@@ -1,4 +1,5 @@
 #include "PPU.h"
+#include "Bus.h"
 
 PPU::PPU()
 {
@@ -24,6 +25,9 @@ void PPU::reset()
 	wy = 0;
 	wx = 0;
 
+	modeClock = 0;
+	mode = MODE_OAM;
+
 	for (int i = 0; i < 0x2000; i++)
 	{
 		vram[i] = 0;
@@ -32,6 +36,11 @@ void PPU::reset()
 	for (int i = 0; i < 0xA0; i++)
 	{
 		oam[i] = 0;
+	}
+
+	for (int i = 0; i < 160 * 144; i++)
+	{
+		framebuffer[i] = 0;
 	}
 }
 
@@ -42,6 +51,63 @@ void PPU::setBus(Bus& bus)
 
 void PPU::tick()
 {
+	modeClock++;
+
+	switch (mode)
+	{
+	case MODE_OAM:
+		if (modeClock >= OAM_CYCLES)
+		{
+			modeClock = 0;
+			mode = MODE_TRANSFER;
+		}
+		break;
+
+	case MODE_TRANSFER:
+		if (modeClock >= TRANSFER_CYCLES)
+		{
+			modeClock = 0;
+
+			renderScanline();
+
+			mode = MODE_HBLANK;
+		}
+		break;
+
+	case MODE_HBLANK:
+		if (modeClock >= HBLANK_CYCLES)
+		{
+			modeClock = 0;
+
+			ly++;
+
+			if (ly >= 144)
+			{
+				mode = MODE_VBLANK;
+				bus->requestInterrupt(0);
+			}
+			else
+			{
+				mode = MODE_OAM;
+			}
+		}
+		break;
+
+	case MODE_VBLANK:
+		if (modeClock >= SCANLINE_CYCLES)
+		{
+			modeClock = 0;
+
+			ly++;
+
+			if (ly > 153)
+			{
+				ly = 0;
+				mode = MODE_OAM;
+			}
+		}
+		break;
+	}
 }
 
 uint8_t PPU::read(uint16_t address)
@@ -153,3 +219,83 @@ void PPU::write(uint16_t address, uint8_t value)
 	}
 }
 
+void PPU::renderScanline()
+{
+	if (!(lcdc & 0x80))
+		return;
+
+	if (!(lcdc & 0x01))
+		return;
+
+	uint8_t worldY =
+		(ly + scy) & 0xFF;
+
+	uint8_t tileY =
+		worldY / 8;
+
+	uint8_t pixelY =
+		worldY & 7;
+
+	uint16_t tileMapBase =
+		(lcdc & 0x08)
+		? 0x1C00
+		: 0x1800;
+
+	for (int screenX = 0; screenX < 160; screenX++)
+	{
+		uint8_t worldX =
+			(screenX + scx) & 0xFF;
+
+		uint8_t tileX =
+			worldX / 8;
+
+		uint8_t pixelX =
+			worldX & 7;
+
+		uint16_t tileMapAddress =
+			tileMapBase +
+			(tileY * 32) +
+			tileX;
+
+		uint8_t tile =
+			vram[tileMapAddress];
+
+		uint16_t tileAddress =
+			getTileAddress(tile);
+
+		uint8_t bit =
+			7 - pixelX;
+
+		uint8_t low =
+			(vram[tileAddress + pixelY * 2] >> bit) & 1;
+
+		uint8_t high =
+			(vram[tileAddress + pixelY * 2 + 1] >> bit) & 1;
+
+		uint8_t colour =
+			(high << 1) | low;
+
+		framebuffer[
+			ly * 160 + screenX
+		] = colour;
+	}
+}
+
+uint16_t PPU::getTileAddress(uint8_t tile)
+{
+	if (lcdc & 0x10)
+	{
+		return tile * 16;
+	}
+
+	int8_t signedTile =
+		static_cast<int8_t>(tile);
+
+	return 0x1000 +
+		((signedTile + 128) * 16);
+}
+
+const uint8_t* PPU::getFramebuffer() const
+{
+	return framebuffer;
+}
