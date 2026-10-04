@@ -91,6 +91,15 @@ private:
 	void xor_a_value(uint8_t v);
 	void bit_v_r(uint8_t v, uint8_t r);
 	void inc_reg(uint8_t& r);
+	void dec_reg(uint8_t& r);
+	void inc_rr(uint8_t& h, uint8_t& l);
+	void dec_rr(uint8_t& h, uint8_t& l);
+	void ld_reg_reg(uint8_t& dst, uint8_t v);
+	void rl_r(uint8_t& r);
+	void rl_rr(uint8_t h, uint8_t l);
+	void rr_r(uint8_t& r);
+	void rr_rr(uint8_t h, uint8_t l);
+	void cp_value(uint8_t v);
 
 	//Instructions
 	void NOP();
@@ -98,8 +107,18 @@ private:
 	void INC_A(); void INC_B();	void INC_C(); void INC_D();
 	void INC_E(); void INC_H(); void INC_L();
 	//DEC r
+	void DEC_A(); void DEC_B(); void DEC_C(); void DEC_D();
+	void DEC_E(); void DEC_H(); void DEC_L();
 	//INC rr
+	void INC_BC(); void INC_DE(); void INC_HL();
+	void INC_SP();
+	//INC (rr)
+	void INC_MEM_HL();
 	//DEC rr
+	void DEC_BC(); void DEC_DE(); void DEC_HL();
+	void DEC_SP();
+	//DEC (rr)
+	void DEC_MEM_HL();
 	//AND r
 	//OR r
 	//XOR r
@@ -110,6 +129,20 @@ private:
 	//ADD rr, rr
 	//ADD rr, s8
 	//LD r,r
+	void LD_A_A(); void LD_A_B(); void LD_A_C(); void LD_A_D();
+	void LD_A_E(); void LD_A_H(); void LD_A_L();
+	void LD_B_A(); void LD_B_B(); void LD_B_C(); void LD_B_D();
+	void LD_B_E(); void LD_B_H(); void LD_B_L();
+	void LD_C_A(); void LD_C_B(); void LD_C_C(); void LD_C_D();
+	void LD_C_E(); void LD_C_H(); void LD_C_L();
+	void LD_D_A(); void LD_D_B(); void LD_D_C(); void LD_D_D();
+	void LD_D_E(); void LD_D_H(); void LD_D_L();
+	void LD_E_A(); void LD_E_B(); void LD_E_C(); void LD_E_D();
+	void LD_E_E(); void LD_E_H(); void LD_E_L();
+	void LD_H_A(); void LD_H_B(); void LD_H_C(); void LD_H_D();
+	void LD_H_E(); void LD_H_H(); void LD_H_L();
+	void LD_L_A(); void LD_L_B(); void LD_L_C(); void LD_L_D();
+	void LD_L_E(); void LD_L_H(); void LD_L_L();
 	//LD r,d8
 	//LD r,d8
 	void LD_A_d8(); void LD_B_d8(); void LD_C_d8(); void LD_D_d8();
@@ -133,6 +166,16 @@ private:
 	//LD rr,rr
 	//LD (addr),r
 	void LD_aC_A(); void LD_a8_A(); void LD_a16_A(); void LD_a16_SP();
+	//LD r,(addr)
+	void LD_A_a8(); void LD_A_a16(); void LD_A_aC();
+	//CP r
+	void CP_A(); void CP_B(); void CP_C(); void CP_D();
+	void CP_E(); void CP_H(); void CP_L(); void CP_d8();
+	void CP_HL();
+	//POP
+	void POP_AF(); void POP_BC(); void POP_DE(); void POP_HL();
+	//PUSH
+	void PUSH_AF(); void PUSH_BC(); void PUSH_DE(); void PUSH_HL();
 	//JP
 	void JP_Z_a16(); void JP_C_a16();
 	void JP_NZ_a16(); void JP_NC_a16();
@@ -166,4 +209,14 @@ private:
 	void BIT_6_E(); void BIT_6_H(); void BIT_6_L(); void BIT_6_HL();
 	void BIT_7_A(); void BIT_7_B(); void BIT_7_C(); void BIT_7_D();
 	void BIT_7_E(); void BIT_7_H(); void BIT_7_L(); void BIT_7_HL();
+	//RES v,r
+	//SET v,r
+	//RL r
+	void RL_A(); void RL_B(); void RL_C(); void RL_D();
+	void RL_E(); void RL_H(); void RL_L(); void RL_HL();
+	//RR r
+	void RR_A(); void RR_B(); void RR_C(); void RR_D();
+	void RR_E(); void RR_H(); void RR_L(); void RR_HL();
+	//RLCA, RLA, RRCA, RRA
+	void RLCA(); void RLA(); void RRCA(); void RRA();
 };

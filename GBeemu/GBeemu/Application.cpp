@@ -451,7 +451,13 @@ void Application::renderGameScreen()
 		flags
 	);
 
-	// Game Boy texture goes here
+	ImGui::Image(
+		(ImTextureID)(intptr_t)gameboyTexture,
+		ImVec2(
+			(float)displayWidth,
+			(float)displayHeight
+		)
+	);
 
 	ImGui::End();
 
