@@ -587,6 +587,8 @@ void Application::renderTrace()
 	const std::vector<TraceEntry>& trace =
 		emulator->getTrace();
 
+	bool atBottom = ImGui::GetScrollY() >= ImGui::GetScrollMaxY() - 10.0f;
+
 	for (const TraceEntry& entry : trace)
 	{
 		ImGui::Text(
@@ -610,6 +612,9 @@ void Application::renderTrace()
 			entry.sp
 		);
 	}
+
+	if (atBottom)
+		ImGui::SetScrollHereY(1.0f);
 
 	ImGui::End();
 }

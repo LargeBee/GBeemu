@@ -9,16 +9,9 @@ Cartridge::Cartridge()
 
 void Cartridge::reset()
 {
-	rom.clear();
-	ram.clear();
-
-	cartridgeType = 0;
-	romSize = 0;
-	ramSize = 0;
-
-	romBank = 1;
 	ramBank = 0;
 
+	ramEnable = false;
 	ramEnable = false;
 
 	romBankLow = 1;

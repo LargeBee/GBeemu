@@ -181,14 +181,44 @@ uint16_t CPU::fetch16()
 	return low | (high << 8);
 }
 
+void CPU::write(uint16_t address, uint8_t value)
+{
+	bus.write(address, value);
+}
+
 uint8_t CPU::read(uint16_t address)
 {
-	uint8_t value = bus.read(address);
-
-	return value;
+	return bus.read(address);
 }
 
 const TraceEntry& CPU::getLastTrace() const
 {
 	return lastTrace;
+}
+
+bool CPU::getFlag(Flag flag) const
+{
+	return (F & (1 << flag)) != 0;
+}
+
+void CPU::setFlag(Flag flag)
+{
+	F |= (1 << flag);
+}
+
+void CPU::clearFlag(Flag flag)
+{
+	F &= ~(1 << flag);
+}
+
+void CPU::setFlag(Flag flag, bool value)
+{
+	if (value)
+	{
+		setFlag(flag);
+	}
+	else
+	{
+		clearFlag(flag);
+	}
 }
