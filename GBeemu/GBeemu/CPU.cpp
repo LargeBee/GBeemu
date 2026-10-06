@@ -30,6 +30,7 @@ void CPU::reset()
 	SP = 0;
 
 	ime = false;
+	imeEnableDelay = 0;
 	halted = false;
 	stopped = false;
 
@@ -118,6 +119,14 @@ void CPU::idle()
 
 void CPU::step()
 {
+	if (stopped)
+	{
+		return;
+	}
+
+	if (handleInterrupts())
+		return;
+
 	if (halted)
 	{
 		idle();
@@ -125,8 +134,15 @@ void CPU::step()
 	}
 
 	uint16_t currentPC = PC;
-
-	opcode = fetch8();
+	if (haltBug)
+	{
+		opcode = read(PC);
+		haltBug = false;
+	}
+	else
+	{
+		opcode = fetch8();
+	}
 
 	tickM(1);
 
@@ -152,6 +168,9 @@ void CPU::step()
 		}
 
 		executeCB(cbOpcode);
+
+		updateIME();
+
 		instructionCount++;
 		return;
 	}
@@ -172,6 +191,8 @@ void CPU::step()
 	}
 
 	executeOpcode(opcode);
+
+	updateIME();
 
 	instructionCount++;
 }
@@ -262,4 +283,96 @@ void CPU::setFlag(Flag flag, bool value)
 uint64_t CPU::getInstructionCount() const
 {
 	return instructionCount;
+}
+
+void CPU::updateIME()
+{
+	if (imeEnableDelay > 0)
+	{
+		imeEnableDelay--;
+
+		if (imeEnableDelay == 0)
+		{
+			ime = true;
+		}
+	}
+}
+
+bool CPU::handleInterrupts()
+{
+	uint8_t IE = read(0xFFFF);
+	uint8_t IF = read(0xFF0F);
+
+	uint8_t pending = IE & IF & 0x1F;
+
+	if (pending == 0)
+		return false;
+
+	if (halted)
+	{
+		halted = false;
+	}
+
+	if (!ime)
+		return false;
+
+	ime = false;
+
+	uint8_t interruptBit;
+	uint16_t vector;
+
+	if (pending & 0x01)
+	{
+		interruptBit = 0;
+		vector = 0x0040;
+	}
+	else if (pending & 0x02)
+	{
+		interruptBit = 1;
+		vector = 0x0048;
+	}
+	else if (pending & 0x04)
+	{
+		interruptBit = 2;
+		vector = 0x0050;
+	}
+	else if (pending & 0x08)
+	{
+		interruptBit = 3;
+		vector = 0x0058;
+	}
+	else
+	{
+		interruptBit = 4;
+		vector = 0x0060;
+	}
+
+	IF &= ~(1 << interruptBit);
+	write(0xFF0F, IF);
+
+	tickM(2);
+
+	SP--;
+	write(SP, PC >> 8);
+	tickM(1);
+
+	SP--;
+	write(SP, PC & 0xFF);
+	tickM(1);
+
+	PC = vector;
+
+	tickM(1);
+
+	return true;
+}
+
+void CPU::wakeFromStop()
+{
+	stopped = false;
+}
+
+bool CPU::isStopped() const
+{
+	return stopped;
 }

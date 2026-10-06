@@ -63,6 +63,8 @@ public:
 
 	uint64_t getInstructionCount() const;
 
+	Input& getInput();
+
 private:
 	Cartridge* cartridge;
 	Bus* bus;

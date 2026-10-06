@@ -91,7 +91,7 @@ void Emulator::tick()
 	//timer->tick();
 	//dma->tick();
 	//apu->tick();
-	//input->tick();
+	input->tick();
 }
 
 void Emulator::update()
@@ -101,6 +101,11 @@ void Emulator::update()
 
 	while (!isFrameReady() && running)
 	{
+		if (cpu->isStopped())
+		{
+			break;
+		}
+
 		stepInstruction();
 	}
 }
@@ -260,4 +265,9 @@ void Emulator::clearFrameReady()
 uint64_t Emulator::getInstructionCount() const
 {
 	return cpu->getInstructionCount();
+}
+
+Input& Emulator::getInput()
+{
+	return *input;
 }

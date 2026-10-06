@@ -47,6 +47,8 @@ public:
 	void setFlag(Flag flag, bool value);
 
 	uint64_t getInstructionCount() const;
+
+	bool isStopped() const;
 	
 private:
 	Emulator& emulator;
@@ -71,7 +73,17 @@ private:
 	//State
 	bool ime;
 	bool halted;
+	bool haltBug;
 	bool stopped;
+	uint8_t imeEnableDelay;
+
+	
+
+	void updateIME();
+
+	bool handleInterrupts();
+
+	void wakeFromStop();
 
 	TraceEntry lastTrace;
 	std::ofstream traceFile;
@@ -117,9 +129,12 @@ private:
 	void sla_hl();
 	void sra_r(uint8_t& reg);
 	void sra_hl();
+	void srl_r(uint8_t& reg);
+	void srl_hl();
 
 	//Instructions
-	void NOP();
+	void NOP(); void EI(); void DI(); void STOP(); void DAA();
+	void SCF(); void CCF(); void CPL(); void HALT();
 	//INC r
 	void INC_A(); void INC_B();	void INC_C(); void INC_D();
 	void INC_E(); void INC_H(); void INC_L();
@@ -279,4 +294,7 @@ private:
 	void RR_E(); void RR_H(); void RR_L(); void RR_HL();
 	//RLCA, RLA, RRCA, RRA
 	void RLCA(); void RLA(); void RRCA(); void RRA();
+	//SRL r
+	void SRL_A(); void SRL_B(); void SRL_C(); void SRL_D();
+	void SRL_E(); void SRL_H(); void SRL_L(); void SRL_HL();
 };

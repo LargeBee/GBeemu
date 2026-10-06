@@ -27,6 +27,7 @@ void CPU::buildInstructionTables()
 	instructions[0x0E] = { "LD C,d8", &CPU::LD_C_d8,  2, 8 };
 	instructions[0x0F] = { "RRCA", &CPU::RRCA, 1, 4 };
 
+	instructions[0x10] = { "STOP", &CPU::STOP, 2, 4 };
 	instructions[0x11] = { "LD DE,d16", &CPU::LD_DE_d16,  3, 12 };
 	instructions[0x12] = { "LD (DE),A", &CPU::LD_DE_A, 1, 8 };
 	instructions[0x13] = { "INC DE", &CPU::INC_DE, 1, 8 };
@@ -50,6 +51,7 @@ void CPU::buildInstructionTables()
 	instructions[0x24] = { "INC H", &CPU::INC_H,  1, 4 };
 	instructions[0x25] = { "DEC H", &CPU::DEC_H, 1, 4 };
 	instructions[0x26] = { "LD H,d8", &CPU::LD_H_d8,  2, 8 };
+	instructions[0x27] = { "DAA", &CPU::DAA, 1, 4 };
 	instructions[0x28] = { "JR Z,s8", &CPU::JR_Z_s8, 2, 8 };
 	instructions[0x29] = { "ADD HL,HL", &CPU::ADD_HL_HL, 1, 8 };
 	instructions[0x2A] = { "LD A,(HL+)", &CPU::LD_A_HL_P, 1, 8 };
@@ -57,6 +59,7 @@ void CPU::buildInstructionTables()
 	instructions[0x2C] = { "INC L", &CPU::INC_L,  1, 4 };
 	instructions[0x2D] = { "DEC L", &CPU::DEC_L, 1, 4 };
 	instructions[0x2E] = { "LD L,d8", &CPU::LD_L_d8,  2, 8 };
+	instructions[0x2F] = { "CPL", &CPU::CPL, 1, 4 };
 
 	instructions[0x30] = { "JR NC,s8", &CPU::JR_NC_s8, 2, 8 };
 	instructions[0x31] = { "LD SP,d16", &CPU::LD_SP_d16, 3, 12 };
@@ -65,6 +68,7 @@ void CPU::buildInstructionTables()
 	instructions[0x34] = { "INC (HL)", &CPU::INC_MEM_HL, 1, 12 };
 	instructions[0x35] = { "DEC (HL)", &CPU::DEC_MEM_HL, 1, 12 };
 	instructions[0x36] = { "LD (HL),d8", &CPU::LD_HL_d8, 2, 12 };
+	instructions[0x37] = { "SCF", &CPU::SCF, 1, 4 };
 	instructions[0x38] = { "JR C,s8", &CPU::JR_C_s8, 2, 8 };
 	instructions[0x39] = { "ADD HL,SP", &CPU::ADD_HL_SP, 1, 8 };
 	instructions[0x3A] = { "LD A,(HL-)", &CPU::LD_A_HL_M, 1, 8 };
@@ -72,6 +76,7 @@ void CPU::buildInstructionTables()
 	instructions[0x3C] = { "INC A", &CPU::INC_A,  1, 4 };
 	instructions[0x3D] = { "DEC A", &CPU::DEC_A, 1, 4 };
 	instructions[0x3E] = { "LD A,d8", &CPU::LD_A_d8,  2, 8 };
+	instructions[0x3F] = { "CCF", &CPU::CCF, 1, 4 };
 
 	instructions[0x40] = { "LD B,B", &CPU::LD_B_B, 1, 4 };
 	instructions[0x41] = { "LD B,C", &CPU::LD_B_C, 1, 4 };
@@ -130,6 +135,7 @@ void CPU::buildInstructionTables()
 	instructions[0x73] = { "LD (HL),E", &CPU::LD_HL_E,  1, 8 };
 	instructions[0x74] = { "LD (HL),H", &CPU::LD_HL_H,  1, 8 };
 	instructions[0x75] = { "LD (HL),L", &CPU::LD_HL_L,  1, 8 };
+	instructions[0x76] = { "HALT", &CPU::HALT, 1, 4 };
 	instructions[0x77] = { "LD (HL),A", &CPU::LD_HL_A,  1, 8 };
 	instructions[0x78] = { "LD A,B", &CPU::LD_A_B, 1, 4 };
 	instructions[0x79] = { "LD A,C", &CPU::LD_A_C, 1, 4 };
@@ -229,11 +235,13 @@ void CPU::buildInstructionTables()
 	instructions[0xF0] = { "LD A,(a8)", &CPU::LD_A_a8, 2, 12 };
 	instructions[0xF1] = { "POP AF", &CPU::POP_AF, 1, 12 };
 	instructions[0xF2] = { "LD A,(C)", &CPU::LD_A_aC, 1, 8 };
+	instructions[0xF3] = { "DI", &CPU::DI, 1, 4 };
 	instructions[0xF5] = { "PUSH AF", &CPU::PUSH_AF, 1, 16 };
 	instructions[0xF6] = { "OR d8", &CPU::OR_d8, 2, 8 };
 	instructions[0xF8] = { "LD HL,SP+s8", &CPU::LD_HL_SP_s8, 2, 12 };
 	instructions[0xF9] = { "LD SP,HL", &CPU::LD_SP_HL, 1, 8 };
 	instructions[0xFA] = { "LD A,(a16)", &CPU::LD_A_a16, 3, 16 };
+	instructions[0xFB] = { "EI", &CPU::EI, 1, 4 };
 	instructions[0xFE] = { "CP d8", &CPU::CP_d8, 2, 8 };
 
 	//0x10 - 0x1F
@@ -270,6 +278,15 @@ void CPU::buildInstructionTables()
 	cbInstructions[0x2D] = { "SRA L", &CPU::SRA_L, 2, 8 };
 	cbInstructions[0x2E] = { "SRA (HL)", &CPU::SRA_HL, 2, 16 };
 	cbInstructions[0x2F] = { "SRA A", &CPU::SRA_A, 2, 8 };
+
+	cbInstructions[0x38] = { "SRL B", &CPU::SRL_B, 2, 8 };
+	cbInstructions[0x39] = { "SRL C", &CPU::SRL_C, 2, 8 };
+	cbInstructions[0x3A] = { "SRL D", &CPU::SRL_D, 2, 8 };
+	cbInstructions[0x3B] = { "SRL E", &CPU::SRL_E, 2, 8 };
+	cbInstructions[0x3C] = { "SRL H", &CPU::SRL_H, 2, 8 };
+	cbInstructions[0x3D] = { "SRL L", &CPU::SRL_L, 2, 8 };
+	cbInstructions[0x3E] = { "SRL (HL)", &CPU::SRL_HL, 2, 16 };
+	cbInstructions[0x3F] = { "SRL A", &CPU::SRL_A, 2, 8 };
 
 	//0x40 - 0x4F
 	cbInstructions[0x40] = { "BIT 0,B", &CPU::BIT_0_B, 2, 8 };
@@ -702,8 +719,106 @@ void CPU::sra_hl()
 	clearFlag(FLAG_H);
 }
 
+void CPU::srl_r(uint8_t& reg)
+{
+	uint8_t value = reg;
+
+	setFlag(FLAG_C, value & 0x01);
+
+	reg = value >> 1;
+
+	setFlag(FLAG_Z, reg == 0);
+	clearFlag(FLAG_N);
+	clearFlag(FLAG_H);
+}
+
+void CPU::srl_hl()
+{
+	uint16_t address = (H << 8) | L;
+	uint8_t value = read(address);
+
+	tickM(1);
+
+	setFlag(FLAG_C, value & 0x01);
+
+	value >>= 1;
+
+	write(address, value);
+
+	tickM(1);
+
+	setFlag(FLAG_Z, value == 0);
+	clearFlag(FLAG_N);
+	clearFlag(FLAG_H);
+}
+
 //Hardware Instructions
 void CPU::NOP() { return; }
+void CPU::EI() { imeEnableDelay = 2; }
+void CPU::DI() { ime = false; imeEnableDelay = 0; }
+void CPU::STOP() { fetch8(); stopped = true; }
+void CPU::DAA()
+{
+	uint8_t correction = 0;
+	bool carry = getFlag(FLAG_C);
+
+	if (!getFlag(FLAG_N))
+	{
+		if (getFlag(FLAG_H) || (A & 0x0F) > 0x09)
+		{
+			correction |= 0x06;
+		}
+
+		if (carry || A > 0x99)
+		{
+			correction |= 0x60;
+			carry = true;
+		}
+
+		A += correction;
+	}
+	else
+	{
+		if (getFlag(FLAG_H))
+		{
+			correction |= 0x06;
+		}
+
+		if (carry)
+		{
+			correction |= 0x60;
+		}
+
+		A -= correction;
+	}
+
+	setFlag(FLAG_Z, A == 0);
+	clearFlag(FLAG_H);
+	setFlag(FLAG_C, carry);
+
+	// N is unaffected
+}
+void CPU::SCF() { setFlag(FLAG_C); clearFlag(FLAG_N); clearFlag(FLAG_H); }
+void CPU::CCF() { setFlag(FLAG_C, !getFlag(FLAG_C)); clearFlag(FLAG_N); clearFlag(FLAG_H); }
+void CPU::CPL() { A = ~A; setFlag(FLAG_N); setFlag(FLAG_H); }
+void CPU::HALT() 
+{
+	uint8_t IE = read(0xFFFF);
+	uint8_t IF = read(0xFF0F);
+
+	bool interruptPending =
+		(IE & IF & 0x1F) != 0;
+
+	if (!ime && interruptPending)
+	{
+		haltBug = true;
+	}
+	else
+	{
+		halted = true;
+	}
+}
+
 //INC r
 void CPU::INC_A() { inc_reg(A); }
 void CPU::INC_B() { inc_reg(B); }
@@ -1171,3 +1286,12 @@ void CPU::RLCA() { bool carry = (A & 0x80) != 0; A = (A << 1) | carry; clearFlag
 void CPU::RLA() { bool carry = (A & 0x80) != 0; bool oldCarry = getFlag(FLAG_C); A = (A << 1) | oldCarry; clearFlag(FLAG_Z); clearFlag(FLAG_N); clearFlag(FLAG_H); setFlag(FLAG_C, carry); }
 void CPU::RRCA() { bool carry = (A & 0x01) != 0; A = (A >> 1) | (carry << 7); clearFlag(FLAG_Z); clearFlag(FLAG_N); clearFlag(FLAG_H); setFlag(FLAG_C, carry); }
 void CPU::RRA() { bool carry = (A & 0x01) != 0; bool oldCarry = getFlag(FLAG_C); A = (A >> 1) | (oldCarry << 7); clearFlag(FLAG_Z); clearFlag(FLAG_N); clearFlag(FLAG_H); setFlag(FLAG_C, carry); }
+//SRL r
+void CPU::SRL_A() { srl_r(A); }
+void CPU::SRL_B() { srl_r(B); }
+void CPU::SRL_C() { srl_r(C); }
+void CPU::SRL_D() { srl_r(D); }
+void CPU::SRL_E() { srl_r(E); }
+void CPU::SRL_H() { srl_r(H); }
+void CPU::SRL_L() { srl_r(L); }
+void CPU::SRL_HL() { srl_hl(); }

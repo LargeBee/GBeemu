@@ -1,5 +1,6 @@
 #include "Application.h"
 #include "Emulator.h"
+#include "Input.h"
 
 
 Application::Application()
@@ -168,14 +169,48 @@ bool Application::initialize()
 
 void Application::run()
 {
+	const double frameTime =
+		70224.0 / 4194304.0;
+
+	const uint64_t frequency =
+		SDL_GetPerformanceFrequency();
+
+	const uint64_t frameTicks =
+		static_cast<uint64_t>(
+			frameTime * frequency
+			);
+
+	uint64_t nextFrame =
+		SDL_GetPerformanceCounter();
+
 	while (running)
 	{
 		processEvents();
-
 		update();
-
-
 		render();
+
+		nextFrame += frameTicks;
+
+		while (true)
+		{
+			uint64_t now =
+				SDL_GetPerformanceCounter();
+
+			if (now >= nextFrame)
+				break;
+
+			uint64_t remaining =
+				nextFrame - now;
+
+			double remainingSeconds =
+				static_cast<double>(remaining) /
+				static_cast<double>(frequency);
+
+			if (remainingSeconds > 0.002)
+			{
+				SDL_Delay(1);
+			}
+		}
 	}
 }
 
@@ -218,6 +253,82 @@ void Application::processEvents()
 		if (event.type == SDL_EVENT_QUIT)
 		{
 			running = false;
+		}
+
+		if (event.type == SDL_EVENT_KEY_DOWN)
+		{
+			switch (event.key.key)
+			{
+			case SDLK_RIGHT:
+				emulator->getInput().setRight(true);
+				break;
+
+			case SDLK_LEFT:
+				emulator->getInput().setLeft(true);
+				break;
+
+			case SDLK_UP:
+				emulator->getInput().setUp(true);
+				break;
+
+			case SDLK_DOWN:
+				emulator->getInput().setDown(true);
+				break;
+
+			case SDLK_Z:
+				emulator->getInput().setA(true);
+				break;
+
+			case SDLK_X:
+				emulator->getInput().setB(true);
+				break;
+
+			case SDLK_BACKSPACE:
+				emulator->getInput().setSelect(true);
+				break;
+
+			case SDLK_RETURN:
+				emulator->getInput().setStart(true);
+				break;
+			}
+		}
+
+		if (event.type == SDL_EVENT_KEY_UP)
+		{
+			switch (event.key.key)
+			{
+			case SDLK_RIGHT:
+				emulator->getInput().setRight(false);
+				break;
+
+			case SDLK_LEFT:
+				emulator->getInput().setLeft(false);
+				break;
+
+			case SDLK_UP:
+				emulator->getInput().setUp(false);
+				break;
+
+			case SDLK_DOWN:
+				emulator->getInput().setDown(false);
+				break;
+
+			case SDLK_Z:
+				emulator->getInput().setA(false);
+				break;
+
+			case SDLK_X:
+				emulator->getInput().setB(false);
+				break;
+
+			case SDLK_BACKSPACE:
+				emulator->getInput().setSelect(false);
+				break;
+
+			case SDLK_RETURN:
+				emulator->getInput().setStart(false);
+				break;
+			}
 		}
 	}
 }
