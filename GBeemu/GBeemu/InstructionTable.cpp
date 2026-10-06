@@ -155,6 +155,14 @@ void CPU::buildInstructionTables()
 	instructions[0x96] = { "SUB (HL)", &CPU::SUB_HL, 1, 8 };
 	instructions[0x97] = { "SUB A", &CPU::SUB_A, 1, 4 };
 
+	instructions[0xA0] = { "AND B", &CPU::AND_B, 1, 4 };
+	instructions[0xA1] = { "AND C", &CPU::AND_C, 1, 4 };
+	instructions[0xA2] = { "AND D", &CPU::AND_D, 1, 4 };
+	instructions[0xA3] = { "AND E", &CPU::AND_E, 1, 4 };
+	instructions[0xA4] = { "AND H", &CPU::AND_H, 1, 4 };
+	instructions[0xA5] = { "AND L", &CPU::AND_L, 1, 4 };
+	instructions[0xA6] = { "AND (HL)", &CPU::AND_HL, 1, 8 };
+	instructions[0xA7] = { "AND A", &CPU::AND_A, 1, 4 };
 	instructions[0xA8] = { "XOR B", &CPU::XOR_B,  1, 4 };
 	instructions[0xA9] = { "XOR C", &CPU::XOR_C,  1, 4 };
 	instructions[0xAA] = { "XOR D", &CPU::XOR_D,  1, 4 };
@@ -201,6 +209,7 @@ void CPU::buildInstructionTables()
 	instructions[0xE1] = { "POP HL", &CPU::POP_HL, 1, 12 };
 	instructions[0xE2] = { "LD (C),A", &CPU::LD_aC_A,  1, 8 };
 	instructions[0xE5] = { "PUSH HL", &CPU::PUSH_HL, 1, 16 };
+	instructions[0xE6] = { "AND d8", &CPU::AND_d8, 2, 8 };
 	instructions[0xE8] = { "ADD SP,s8", &CPU::ADD_SP_s8, 2, 16 };
 	instructions[0xE9] = { "JP HL", &CPU::JP_HL, 1, 4 };
 	instructions[0xEA] = { "LD (a16),A", &CPU::LD_a16_A,  3, 16 };
@@ -302,6 +311,74 @@ void CPU::buildInstructionTables()
 	cbInstructions[0x7D] = { "BIT 7,L", &CPU::BIT_7_L, 2, 8 };
 	cbInstructions[0x7E] = { "BIT 7,HL", &CPU::BIT_7_HL, 2, 12 };
 	cbInstructions[0x7F] = { "BIT 7,A", &CPU::BIT_7_A, 2, 8 };
+
+	cbInstructions[0x80] = { "RES 0,B", &CPU::RES_0_B, 2, 8 };
+	cbInstructions[0x81] = { "RES 0,C", &CPU::RES_0_C, 2, 8 };
+	cbInstructions[0x82] = { "RES 0,D", &CPU::RES_0_D, 2, 8 };
+	cbInstructions[0x83] = { "RES 0,E", &CPU::RES_0_E, 2, 8 };
+	cbInstructions[0x84] = { "RES 0,H", &CPU::RES_0_H, 2, 8 };
+	cbInstructions[0x85] = { "RES 0,L", &CPU::RES_0_L, 2, 8 };
+	cbInstructions[0x86] = { "RES 0,(HL)", &CPU::RES_0_HL, 2, 16 };
+	cbInstructions[0x87] = { "RES 0,A", &CPU::RES_0_A, 2, 8 };
+	cbInstructions[0x88] = { "RES 1,B", &CPU::RES_1_B, 2, 8 };
+	cbInstructions[0x89] = { "RES 1,C", &CPU::RES_1_C, 2, 8 };
+	cbInstructions[0x8A] = { "RES 1,D", &CPU::RES_1_D, 2, 8 };
+	cbInstructions[0x8B] = { "RES 1,E", &CPU::RES_1_E, 2, 8 };
+	cbInstructions[0x8C] = { "RES 1,H", &CPU::RES_1_H, 2, 8 };
+	cbInstructions[0x8D] = { "RES 1,L", &CPU::RES_1_L, 2, 8 };
+	cbInstructions[0x8E] = { "RES 1,(HL)", &CPU::RES_1_HL, 2, 16 };
+	cbInstructions[0x8F] = { "RES 1,A", &CPU::RES_1_A, 2, 8 };
+
+	cbInstructions[0x90] = { "RES 2,B", &CPU::RES_2_B, 2, 8 };
+	cbInstructions[0x91] = { "RES 2,C", &CPU::RES_2_C, 2, 8 };
+	cbInstructions[0x92] = { "RES 2,D", &CPU::RES_2_D, 2, 8 };
+	cbInstructions[0x93] = { "RES 2,E", &CPU::RES_2_E, 2, 8 };
+	cbInstructions[0x94] = { "RES 2,H", &CPU::RES_2_H, 2, 8 };
+	cbInstructions[0x95] = { "RES 2,L", &CPU::RES_2_L, 2, 8 };
+	cbInstructions[0x96] = { "RES 2,(HL)", &CPU::RES_2_HL, 2, 16 };
+	cbInstructions[0x97] = { "RES 2,A", &CPU::RES_2_A, 2, 8 };
+	cbInstructions[0x98] = { "RES 3,B", &CPU::RES_3_B, 2, 8 };
+	cbInstructions[0x99] = { "RES 3,C", &CPU::RES_3_C, 2, 8 };
+	cbInstructions[0x9A] = { "RES 3,D", &CPU::RES_3_D, 2, 8 };
+	cbInstructions[0x9B] = { "RES 3,E", &CPU::RES_3_E, 2, 8 };
+	cbInstructions[0x9C] = { "RES 3,H", &CPU::RES_3_H, 2, 8 };
+	cbInstructions[0x9D] = { "RES 3,L", &CPU::RES_3_L, 2, 8 };
+	cbInstructions[0x9E] = { "RES 3,(HL)", &CPU::RES_3_HL, 2, 16 };
+	cbInstructions[0x9F] = { "RES 3,A", &CPU::RES_3_A, 2, 8 };
+
+	cbInstructions[0xA0] = { "RES 4,B", &CPU::RES_4_B, 2, 8 };
+	cbInstructions[0xA1] = { "RES 4,C", &CPU::RES_4_C, 2, 8 };
+	cbInstructions[0xA2] = { "RES 4,D", &CPU::RES_4_D, 2, 8 };
+	cbInstructions[0xA3] = { "RES 4,E", &CPU::RES_4_E, 2, 8 };
+	cbInstructions[0xA4] = { "RES 4,H", &CPU::RES_4_H, 2, 8 };
+	cbInstructions[0xA5] = { "RES 4,L", &CPU::RES_4_L, 2, 8 };
+	cbInstructions[0xA6] = { "RES 4,(HL)", &CPU::RES_4_HL, 2, 16 };
+	cbInstructions[0xA7] = { "RES 4,A", &CPU::RES_4_A, 2, 8 };
+	cbInstructions[0xA8] = { "RES 5,B", &CPU::RES_5_B, 2, 8 };
+	cbInstructions[0xA9] = { "RES 5,C", &CPU::RES_5_C, 2, 8 };
+	cbInstructions[0xAA] = { "RES 5,D", &CPU::RES_5_D, 2, 8 };
+	cbInstructions[0xAB] = { "RES 5,E", &CPU::RES_5_E, 2, 8 };
+	cbInstructions[0xAC] = { "RES 5,H", &CPU::RES_5_H, 2, 8 };
+	cbInstructions[0xAD] = { "RES 5,L", &CPU::RES_5_L, 2, 8 };
+	cbInstructions[0xAE] = { "RES 5,(HL)", &CPU::RES_5_HL, 2, 16 };
+	cbInstructions[0xAF] = { "RES 5,A", &CPU::RES_5_A, 2, 8 };
+
+	cbInstructions[0xB0] = { "RES 6,B", &CPU::RES_6_B, 2, 8 };
+	cbInstructions[0xB1] = { "RES 6,C", &CPU::RES_6_C, 2, 8 };
+	cbInstructions[0xB2] = { "RES 6,D", &CPU::RES_6_D, 2, 8 };
+	cbInstructions[0xB3] = { "RES 6,E", &CPU::RES_6_E, 2, 8 };
+	cbInstructions[0xB4] = { "RES 6,H", &CPU::RES_6_H, 2, 8 };
+	cbInstructions[0xB5] = { "RES 6,L", &CPU::RES_6_L, 2, 8 };
+	cbInstructions[0xB6] = { "RES 6,(HL)", &CPU::RES_6_HL, 2, 16 };
+	cbInstructions[0xB7] = { "RES 6,A", &CPU::RES_6_A, 2, 8 };
+	cbInstructions[0xB8] = { "RES 7,B", &CPU::RES_7_B, 2, 8 };
+	cbInstructions[0xB9] = { "RES 7,C", &CPU::RES_7_C, 2, 8 };
+	cbInstructions[0xBA] = { "RES 7,D", &CPU::RES_7_D, 2, 8 };
+	cbInstructions[0xBB] = { "RES 7,E", &CPU::RES_7_E, 2, 8 };
+	cbInstructions[0xBC] = { "RES 7,H", &CPU::RES_7_H, 2, 8 };
+	cbInstructions[0xBD] = { "RES 7,L", &CPU::RES_7_L, 2, 8 };
+	cbInstructions[0xBE] = { "RES 7,(HL)", &CPU::RES_7_HL, 2, 16 };
+	cbInstructions[0xBF] = { "RES 7,A", &CPU::RES_7_A, 2, 8 };
 }
 
 //Helper Functions
@@ -508,6 +585,16 @@ void CPU::add_hl_value(uint16_t value)
 	L = HL & 0xFF;
 }
 
+void CPU::and_a_value(uint8_t value)
+{
+	A &= value;
+
+	setFlag(FLAG_Z, A == 0);
+	clearFlag(FLAG_N);
+	setFlag(FLAG_H);
+	clearFlag(FLAG_C);
+}
+
 //Hardware Instructions
 void CPU::NOP() { return; }
 //INC r
@@ -541,6 +628,16 @@ void CPU::DEC_SP() { SP--; tickM(1); }
 //DEC (rr)
 void CPU::DEC_MEM_HL() { uint16_t address = (H << 8) | L; uint8_t value = read(address); tickM(1); dec_reg(value); write(address, value); tickM(1); }
 //AND r
+void CPU::AND_A() { and_a_value(A); }
+void CPU::AND_B() { and_a_value(B); }
+void CPU::AND_C() { and_a_value(C); }
+void CPU::AND_D() { and_a_value(D); }
+void CPU::AND_E() { and_a_value(E); }
+void CPU::AND_H() { and_a_value(H); }
+void CPU::AND_L() { and_a_value(L); }
+void CPU::AND_d8() { uint8_t value = fetch8(); tickM(1); and_a_value(value); }
+//AND (rr)
+void CPU::AND_HL() { uint16_t address = (H << 8) | L; uint8_t value = read(address); tickM(1); and_a_value(value); }
 //OR r
 //XOR r
 void CPU::XOR_A() {	uint8_t value = A; xor_a_value(value); }
@@ -821,6 +918,70 @@ void CPU::BIT_7_H() { bit_v_r(7, H); }
 void CPU::BIT_7_L() { bit_v_r(7, L); }
 void CPU::BIT_7_HL() { uint16_t HL = (H << 8) | L; uint8_t value = read(HL); tickM(1); bit_v_r(7, value); }
 //RES v,r
+void CPU::RES_0_A() { A &= ~(1 << 0); }
+void CPU::RES_0_B() { B &= ~(1 << 0); }
+void CPU::RES_0_C() { C &= ~(1 << 0); }
+void CPU::RES_0_D() { D &= ~(1 << 0); }
+void CPU::RES_0_E() { E &= ~(1 << 0); }
+void CPU::RES_0_H() { H &= ~(1 << 0); }
+void CPU::RES_0_L() { L &= ~(1 << 0); }
+void CPU::RES_0_HL() { uint16_t address = (H << 8) | L; uint8_t value = read(address); tickM(1); value &= ~(1 << 0); write(address, value); tickM(1); }
+void CPU::RES_1_A() { A &= ~(1 << 1); }
+void CPU::RES_1_B() { B &= ~(1 << 1); }
+void CPU::RES_1_C() { C &= ~(1 << 1); }
+void CPU::RES_1_D() { D &= ~(1 << 1); }
+void CPU::RES_1_E() { E &= ~(1 << 1); }
+void CPU::RES_1_H() { H &= ~(1 << 1); }
+void CPU::RES_1_L() { L &= ~(1 << 1); }
+void CPU::RES_1_HL() { uint16_t address = (H << 8) | L; uint8_t value = read(address); tickM(1); value &= ~(1 << 1); write(address, value); tickM(1); }
+void CPU::RES_2_A() { A &= ~(1 << 2); }
+void CPU::RES_2_B() { B &= ~(1 << 2); }
+void CPU::RES_2_C() { C &= ~(1 << 2); }
+void CPU::RES_2_D() { D &= ~(1 << 2); }
+void CPU::RES_2_E() { E &= ~(1 << 2); }
+void CPU::RES_2_H() { H &= ~(1 << 2); }
+void CPU::RES_2_L() { L &= ~(1 << 2); }
+void CPU::RES_2_HL() { uint16_t address = (H << 8) | L; uint8_t value = read(address); tickM(1); value &= ~(1 << 2); write(address, value); tickM(1); }
+void CPU::RES_3_A() { A &= ~(1 << 3); }
+void CPU::RES_3_B() { B &= ~(1 << 3); }
+void CPU::RES_3_C() { C &= ~(1 << 3); }
+void CPU::RES_3_D() { D &= ~(1 << 3); }
+void CPU::RES_3_E() { E &= ~(1 << 3); }
+void CPU::RES_3_H() { H &= ~(1 << 3); }
+void CPU::RES_3_L() { L &= ~(1 << 3); }
+void CPU::RES_3_HL() { uint16_t address = (H << 8) | L; uint8_t value = read(address); tickM(1); value &= ~(1 << 3); write(address, value); tickM(1); }
+void CPU::RES_4_A() { A &= ~(1 << 4); }
+void CPU::RES_4_B() { B &= ~(1 << 4); }
+void CPU::RES_4_C() { C &= ~(1 << 4); }
+void CPU::RES_4_D() { D &= ~(1 << 4); }
+void CPU::RES_4_E() { E &= ~(1 << 4); }
+void CPU::RES_4_H() { H &= ~(1 << 4); }
+void CPU::RES_4_L() { L &= ~(1 << 4); }
+void CPU::RES_4_HL() { uint16_t address = (H << 8) | L; uint8_t value = read(address); tickM(1); value &= ~(1 << 4); write(address, value); tickM(1); }
+void CPU::RES_5_A() { A &= ~(1 << 5); }
+void CPU::RES_5_B() { B &= ~(1 << 5); }
+void CPU::RES_5_C() { C &= ~(1 << 5); }
+void CPU::RES_5_D() { D &= ~(1 << 5); }
+void CPU::RES_5_E() { E &= ~(1 << 5); }
+void CPU::RES_5_H() { H &= ~(1 << 5); }
+void CPU::RES_5_L() { L &= ~(1 << 5); }
+void CPU::RES_5_HL() { uint16_t address = (H << 8) | L; uint8_t value = read(address); tickM(1); value &= ~(1 << 5); write(address, value); tickM(1); }
+void CPU::RES_6_A() { A &= ~(1 << 6); }
+void CPU::RES_6_B() { B &= ~(1 << 6); }
+void CPU::RES_6_C() { C &= ~(1 << 6); }
+void CPU::RES_6_D() { D &= ~(1 << 6); }
+void CPU::RES_6_E() { E &= ~(1 << 6); }
+void CPU::RES_6_H() { H &= ~(1 << 6); }
+void CPU::RES_6_L() { L &= ~(1 << 6); }
+void CPU::RES_6_HL() { uint16_t address = (H << 8) | L; uint8_t value = read(address); tickM(1); value &= ~(1 << 6); write(address, value); tickM(1); }
+void CPU::RES_7_A() { A &= ~(1 << 7); }
+void CPU::RES_7_B() { B &= ~(1 << 7); }
+void CPU::RES_7_C() { C &= ~(1 << 7); }
+void CPU::RES_7_D() { D &= ~(1 << 7); }
+void CPU::RES_7_E() { E &= ~(1 << 7); }
+void CPU::RES_7_H() { H &= ~(1 << 7); }
+void CPU::RES_7_L() { L &= ~(1 << 7); }
+void CPU::RES_7_HL() { uint16_t address = (H << 8) | L; uint8_t value = read(address); tickM(1); value &= ~(1 << 7); write(address, value); tickM(1); }
 //SET v,r
 //RL r
 void CPU::RL_A() { rl_r(A); }

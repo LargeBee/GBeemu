@@ -111,6 +111,7 @@ private:
 	void cp_value(uint8_t v);
 	void add_a_value(uint8_t value);
 	void add_hl_value(uint16_t value);
+	void and_a_value(uint8_t v);
 
 	//Instructions
 	void NOP();
@@ -131,6 +132,10 @@ private:
 	//DEC (rr)
 	void DEC_MEM_HL();
 	//AND r
+	void AND_A(); void AND_B(); void AND_C(); void AND_D();
+	void AND_E(); void AND_H(); void AND_L(); void AND_d8();
+	//AND (rr)
+	void AND_HL();
 	//OR r
 	//XOR r
 	void XOR_A(); void XOR_B(); void XOR_C(); void XOR_D();
@@ -234,6 +239,22 @@ private:
 	void BIT_7_A(); void BIT_7_B(); void BIT_7_C(); void BIT_7_D();
 	void BIT_7_E(); void BIT_7_H(); void BIT_7_L(); void BIT_7_HL();
 	//RES v,r
+	void RES_0_A(); void RES_0_B(); void RES_0_C(); void RES_0_D();
+	void RES_0_E(); void RES_0_H(); void RES_0_L(); void RES_0_HL();
+	void RES_1_A(); void RES_1_B(); void RES_1_C(); void RES_1_D();
+	void RES_1_E(); void RES_1_H(); void RES_1_L(); void RES_1_HL();
+	void RES_2_A(); void RES_2_B(); void RES_2_C(); void RES_2_D();
+	void RES_2_E(); void RES_2_H(); void RES_2_L(); void RES_2_HL();
+	void RES_3_A(); void RES_3_B(); void RES_3_C(); void RES_3_D();
+	void RES_3_E(); void RES_3_H(); void RES_3_L(); void RES_3_HL();
+	void RES_4_A(); void RES_4_B(); void RES_4_C(); void RES_4_D();
+	void RES_4_E(); void RES_4_H(); void RES_4_L(); void RES_4_HL();
+	void RES_5_A(); void RES_5_B(); void RES_5_C(); void RES_5_D();
+	void RES_5_E(); void RES_5_H(); void RES_5_L(); void RES_5_HL();
+	void RES_6_A(); void RES_6_B(); void RES_6_C(); void RES_6_D();
+	void RES_6_E(); void RES_6_H(); void RES_6_L(); void RES_6_HL();
+	void RES_7_A(); void RES_7_B(); void RES_7_C(); void RES_7_D();
+	void RES_7_E(); void RES_7_H(); void RES_7_L(); void RES_7_HL();
 	//SET v,r
 	//RL r
 	void RL_A(); void RL_B(); void RL_C(); void RL_D();
