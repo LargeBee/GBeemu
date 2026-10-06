@@ -19,6 +19,7 @@ Application::Application()
 	windowSized = false;
 
 	traceOpen = false;
+	statsOpen = false;
 }
 
 Application::~Application()
@@ -173,7 +174,6 @@ void Application::run()
 
 		update();
 
-		updateGameBoyTexture();
 
 		render();
 	}
@@ -224,9 +224,64 @@ void Application::processEvents()
 
 void Application::update()
 {
-	if (emulator)
+	uint64_t currentCounter =
+		SDL_GetPerformanceCounter();
+
+	uint64_t frequency =
+		SDL_GetPerformanceFrequency();
+
+	if (lastPerformanceCounter == 0)
 	{
-		emulator->update();
+		lastPerformanceCounter = currentCounter;
+		lastCycles = emulator->getCycles();
+		lastInstructions = emulator->getInstructionCount();
+	}
+
+	double elapsed =
+		(double)(currentCounter - lastPerformanceCounter) /
+		(double)frequency;
+
+	if (elapsed >= 1.0)
+	{
+		uint64_t currentCycles =
+			emulator->getCycles();
+
+		uint64_t cycles =
+			currentCycles - lastCycles;
+
+		cyclesPerSecond =
+			(double)cycles / elapsed;
+
+		emulationSpeed =
+			cyclesPerSecond / 4194304.0;
+
+		uint64_t currentInstructions =
+			emulator->getInstructionCount();
+
+		uint64_t instructions =
+			currentInstructions - lastInstructions;
+
+		instructionsPerSecond =
+			(double)instructions / elapsed;
+
+		fps =
+			frameCount / elapsed;
+
+		frameCount = 0;
+
+		lastCycles = currentCycles;
+		lastInstructions = currentInstructions;
+		lastPerformanceCounter = currentCounter;
+	}
+
+	emulator->update();
+
+	if (emulator->isFrameReady())
+	{
+		updateGameBoyTexture();
+		emulator->clearFrameReady();
+
+		frameCount++;
 	}
 }
 
@@ -241,6 +296,7 @@ void Application::render()
 	renderGameScreen();
 	//renderCPU();
 	renderTrace();
+	renderStats();
 	//renderMemoryView();
 	//renderInput();
 	//renderTileViewer();
@@ -251,11 +307,7 @@ void Application::render()
 	int width;
 	int height;
 
-	SDL_GetWindowSize(
-		window,
-		&width,
-		&height
-	);
+	SDL_GetWindowSizeInPixels(window, &width, &height);
 
 	glViewport(
 		0,
@@ -381,16 +433,17 @@ void Application::renderMenuBar()
 		{
 			if (ImGui::MenuItem("Trace Viewer"))
 			{
-				if (!traceOpen)
-				{
-					traceOpen = true;
-				}
+				traceOpen = !traceOpen;
 			}
 			if (ImGui::MenuItem("Memory Viewer"))
 			{
 			}
 			if (ImGui::MenuItem("Tile Viewer"))
 			{
+			}
+			if (ImGui::MenuItem("Stats Viewer"))
+			{
+				statsOpen = !statsOpen;
 			}
 
 			ImGui::EndMenu();
@@ -451,12 +504,24 @@ void Application::renderGameScreen()
 		flags
 	);
 
+	ImDrawList* drawList = ImGui::GetWindowDrawList();
+
+	drawList->AddCallback(
+		ImGui::GetPlatformIO().DrawCallback_SetSamplerNearest,
+		nullptr
+	);
+
 	ImGui::Image(
 		(ImTextureID)(intptr_t)gameboyTexture,
 		ImVec2(
 			(float)displayWidth,
 			(float)displayHeight
 		)
+	);
+
+	drawList->AddCallback(
+		ImGui::GetPlatformIO().DrawCallback_SetSamplerLinear,
+		nullptr
 	);
 
 	ImGui::End();
@@ -563,10 +628,10 @@ void Application::updateGameBoyTexture()
 		rgbaFramebuffer
 	);
 
-	glBindTexture(
+	/*glBindTexture(
 		GL_TEXTURE_2D,
 		0
-	);
+	);*/
 }
 
 void Application::renderTrace()
@@ -590,6 +655,13 @@ void Application::renderTrace()
 
 	ImGui::Separator();
 
+	ImGui::BeginChild(
+		"TraceOutput",
+		ImVec2(0, 0),
+		ImGuiChildFlags_None,
+		ImGuiWindowFlags_HorizontalScrollbar
+	);
+
 	const std::vector<TraceEntry>& trace =
 		emulator->getTrace();
 
@@ -603,7 +675,7 @@ void Application::renderTrace()
 			"B:%02X C:%02X "
 			"D:%02X E:%02X "
 			"H:%02X L:%02X "
-			"SP:%04X",
+			"SP:%04X LY:%02X",
 			entry.pc,
 			entry.opcode,
 			entry.instruction.c_str(),
@@ -615,12 +687,46 @@ void Application::renderTrace()
 			entry.e,
 			entry.h,
 			entry.l,
-			entry.sp
+			entry.sp,
+			entry.scanline
 		);
 	}
 
 	if (atBottom)
 		ImGui::SetScrollHereY(1.0f);
+
+	ImGui::EndChild();
+
+	ImGui::End();
+}
+
+
+void Application::renderStats()
+{
+	if (!statsOpen)
+		return;
+
+	ImGui::Begin("Stats Viewer");
+	
+	ImGui::Text(
+		"FPS: %.1f / 59.73",
+		fps
+	);
+
+	ImGui::Text(
+		"Cycles: %.2f MHz / 4.19 MHz",
+		cyclesPerSecond / 1000000.0
+	);
+
+	ImGui::Text(
+		"Speed: %.1f%%",
+		emulationSpeed * 100.0
+	);
+
+	ImGui::Text(
+		"Instructions: %.0f / sec",
+		instructionsPerSecond
+	);
 
 	ImGui::End();
 }

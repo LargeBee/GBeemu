@@ -18,6 +18,7 @@ void CPU::buildInstructionTables()
 	instructions[0x06] = { "LD B,d8", &CPU::LD_B_d8,  2, 8 };
 	instructions[0x07] = { "RLCA", &CPU::RLCA, 1, 4 };
 	instructions[0x08] = { "LD (a16), SP", &CPU::LD_a16_SP,  3, 20 };
+	instructions[0x09] = { "ADD HL,BC", &CPU::ADD_HL_BC, 1, 8 };
 	instructions[0x0A] = { "LD A,(BC)", &CPU::LD_A_BC, 1, 8 };
 	instructions[0x0B] = { "DEC BC", &CPU::DEC_BC, 1, 8 };
 	instructions[0x0C] = { "INC C", &CPU::INC_C,  1, 4 };
@@ -32,6 +33,7 @@ void CPU::buildInstructionTables()
 	instructions[0x16] = { "LD D,d8", &CPU::LD_D_d8,  2, 8 };
 	instructions[0x17] = { "RLA", &CPU::RLA, 1, 4 };
 	instructions[0x18] = { "JR s8", &CPU::JR_s8, 2, 12 };
+	instructions[0x19] = { "ADD HL,DE", &CPU::ADD_HL_DE, 1, 8 };
 	instructions[0x1A] = { "LD A,(DE)", &CPU::LD_A_DE, 1, 8 };
 	instructions[0x1B] = { "DEC DE", &CPU::DEC_DE, 1, 8 };
 	instructions[0x1C] = { "INC E", &CPU::INC_E,  1, 4 };
@@ -47,6 +49,7 @@ void CPU::buildInstructionTables()
 	instructions[0x25] = { "DEC H", &CPU::DEC_H, 1, 4 };
 	instructions[0x26] = { "LD H,d8", &CPU::LD_H_d8,  2, 8 };
 	instructions[0x28] = { "JR Z,s8", &CPU::JR_Z_s8, 2, 8 };
+	instructions[0x29] = { "ADD HL,HL", &CPU::ADD_HL_HL, 1, 8 };
 	instructions[0x2A] = { "LD A,(HL+)", &CPU::LD_A_HL_P, 1, 8 };
 	instructions[0x2B] = { "DEC HL", &CPU::DEC_HL, 1, 8 };
 	instructions[0x2C] = { "INC L", &CPU::INC_L,  1, 4 };
@@ -60,6 +63,7 @@ void CPU::buildInstructionTables()
 	instructions[0x34] = { "INC (HL)", &CPU::INC_MEM_HL, 1, 12 };
 	instructions[0x35] = { "DEC (HL)", &CPU::DEC_MEM_HL, 1, 12 };
 	instructions[0x38] = { "JR C,s8", &CPU::JR_C_s8, 2, 8 };
+	instructions[0x39] = { "ADD HL,SP", &CPU::ADD_HL_SP, 1, 8 };
 	instructions[0x3A] = { "LD A,(HL-)", &CPU::LD_A_HL_M, 1, 8 };
 	instructions[0x3B] = { "DEC SP", &CPU::DEC_SP, 1, 8 };
 	instructions[0x3C] = { "INC A", &CPU::INC_A,  1, 4 };
@@ -133,6 +137,24 @@ void CPU::buildInstructionTables()
 	instructions[0x7E] = { "LD A,(HL)", &CPU::LD_A_HL, 1, 8 };
 	instructions[0x7F] = { "LD A,A", &CPU::LD_A_A, 1, 4 };
 
+	instructions[0x80] = { "ADD A,B", &CPU::ADD_A_B, 1, 4 };
+	instructions[0x81] = { "ADD A,C", &CPU::ADD_A_C, 1, 4 };
+	instructions[0x82] = { "ADD A,D", &CPU::ADD_A_D, 1, 4 };
+	instructions[0x83] = { "ADD A,E", &CPU::ADD_A_E, 1, 4 };
+	instructions[0x84] = { "ADD A,H", &CPU::ADD_A_H, 1, 4 };
+	instructions[0x85] = { "ADD A,L", &CPU::ADD_A_L, 1, 4 };
+	instructions[0x86] = { "ADD A,(HL)", &CPU::ADD_A_HL, 1, 8 };
+	instructions[0x87] = { "ADD A,A", &CPU::ADD_A_A, 1, 4 };
+
+	instructions[0x90] = { "SUB B", &CPU::SUB_B, 1, 4 };
+	instructions[0x91] = { "SUB C", &CPU::SUB_C, 1, 4 };
+	instructions[0x92] = { "SUB D", &CPU::SUB_D, 1, 4 };
+	instructions[0x93] = { "SUB E", &CPU::SUB_E, 1, 4 };
+	instructions[0x94] = { "SUB H", &CPU::SUB_H, 1, 4 };
+	instructions[0x95] = { "SUB L", &CPU::SUB_L, 1, 4 };
+	instructions[0x96] = { "SUB (HL)", &CPU::SUB_HL, 1, 8 };
+	instructions[0x97] = { "SUB A", &CPU::SUB_A, 1, 4 };
+
 	instructions[0xA8] = { "XOR B", &CPU::XOR_B,  1, 4 };
 	instructions[0xA9] = { "XOR C", &CPU::XOR_C,  1, 4 };
 	instructions[0xAA] = { "XOR D", &CPU::XOR_D,  1, 4 };
@@ -157,6 +179,7 @@ void CPU::buildInstructionTables()
 	instructions[0xC3] = { "JP a16", &CPU::JP_a16, 3, 16 };
 	instructions[0xC4] = { "CALL NZ, a16", &CPU::CALL_NZ_a16, 3, 12 };
 	instructions[0xC5] = { "PUSH BC", &CPU::PUSH_BC, 1, 16 };
+	instructions[0xC6] = { "ADD A,d8", &CPU::ADD_A_d8, 2, 8 };
 	instructions[0xC8] = { "RET Z", &CPU::RET_Z, 1, 8 };
 	instructions[0xC9] = { "RET", &CPU::RET, 1, 16 };
 	instructions[0xCA] = { "JP Z,a16", &CPU::JP_Z_a16, 3, 12 };
@@ -168,6 +191,7 @@ void CPU::buildInstructionTables()
 	instructions[0xD2] = { "JP NC,a16", &CPU::JP_NC_a16, 3, 12 };
 	instructions[0xD4] = { "CALL NC, a16", &CPU::CALL_NC_a16, 3, 12 };
 	instructions[0xD5] = { "PUSH DE", &CPU::PUSH_DE, 1, 16 };
+	instructions[0xD6] = { "SUB d8", &CPU::SUB_d8, 2, 8 };
 	instructions[0xD8] = { "RET C", &CPU::RET_C, 1, 8 };
 	instructions[0xD9] = { "RETI", &CPU::RETI, 1, 16 };
 	instructions[0xDA] = { "JP C,a16", &CPU::JP_C_a16, 3, 12 };
@@ -177,8 +201,10 @@ void CPU::buildInstructionTables()
 	instructions[0xE1] = { "POP HL", &CPU::POP_HL, 1, 12 };
 	instructions[0xE2] = { "LD (C),A", &CPU::LD_aC_A,  1, 8 };
 	instructions[0xE5] = { "PUSH HL", &CPU::PUSH_HL, 1, 16 };
+	instructions[0xE8] = { "ADD SP,s8", &CPU::ADD_SP_s8, 2, 16 };
 	instructions[0xE9] = { "JP HL", &CPU::JP_HL, 1, 4 };
 	instructions[0xEA] = { "LD (a16),A", &CPU::LD_a16_A,  3, 16 };
+	instructions[0xEE] = { "XOR d8", &CPU::XOR_d8,  2, 8 };
 
 	instructions[0xF0] = { "LD A,(a8)", &CPU::LD_A_a8, 2, 12 };
 	instructions[0xF1] = { "POP AF", &CPU::POP_AF, 1, 12 };
@@ -289,6 +315,20 @@ void CPU::xor_a_value(uint8_t v)
 	clearFlag(FLAG_C);
 }
 
+void CPU::sub_a_value(uint8_t v)
+{
+	uint8_t a = A;
+
+	setFlag(FLAG_H, (a & 0x0F) < (v & 0x0F));
+	setFlag(FLAG_C, a < v);
+
+	uint8_t result = a - v;
+	A = result;
+
+	setFlag(FLAG_Z, result == 0);
+	setFlag(FLAG_N);
+}
+
 void CPU::bit_v_r(uint8_t v, uint8_t r)
 {
 	setFlag(FLAG_Z, (r & (1 << v)) == 0);
@@ -313,7 +353,7 @@ void CPU::dec_reg(uint8_t& r)
 
 	setFlag(FLAG_Z, result == 0);
 	setFlag(FLAG_N);
-	setFlag(FLAG_H, (r & 0x0F) == 0x0F);
+	setFlag(FLAG_H, (r & 0x0F) == 0x00);
 
 	r = result;
 }
@@ -418,6 +458,56 @@ void CPU::cp_value(uint8_t v)
 	setFlag(FLAG_C, a < v);
 }
 
+void CPU::add_a_value(uint8_t value)
+{
+	uint16_t result =
+		static_cast<uint16_t>(A) +
+		static_cast<uint16_t>(value);
+
+	setFlag(
+		FLAG_H,
+		((A & 0x0F) + (value & 0x0F)) > 0x0F
+	);
+
+	setFlag(
+		FLAG_C,
+		result > 0xFF
+	);
+
+	A = static_cast<uint8_t>(result);
+
+	setFlag(FLAG_Z, A == 0);
+	clearFlag(FLAG_N);
+}
+
+void CPU::add_hl_value(uint16_t value)
+{
+	uint16_t HL = (H << 8) | L;
+
+	uint32_t result =
+		static_cast<uint32_t>(HL) +
+		static_cast<uint32_t>(value);
+
+	setFlag(
+		FLAG_H,
+		((HL & 0x0FFF) + (value & 0x0FFF)) > 0x0FFF
+	);
+
+	setFlag(
+		FLAG_C,
+		result > 0xFFFF
+	);
+
+	clearFlag(FLAG_N);
+
+	// Z is unaffected
+
+	HL = static_cast<uint16_t>(result);
+
+	H = HL >> 8;
+	L = HL & 0xFF;
+}
+
 //Hardware Instructions
 void CPU::NOP() { return; }
 //INC r
@@ -442,14 +532,14 @@ void CPU::INC_DE() { inc_rr(D, E); tickM(1); }
 void CPU::INC_HL() { inc_rr(H, L); tickM(1); }
 void CPU::INC_SP() { SP++; tickM(1); }
 //INC (rr)
-void CPU::INC_MEM_HL() { uint16_t address = (H << 8) | L; uint8_t value = read(address); tickM(1); value++; write(address, value); tickM(1); }
+void CPU::INC_MEM_HL() { uint16_t address = (H << 8) | L; uint8_t value = read(address); tickM(1); inc_reg(value); write(address, value); tickM(1); }
 //DEC rr
 void CPU::DEC_BC() { dec_rr(B, C); tickM(1); }
 void CPU::DEC_DE() { dec_rr(D, E); tickM(1); }
 void CPU::DEC_HL() { dec_rr(H, L); tickM(1); }
 void CPU::DEC_SP() { SP--; tickM(1); }
 //DEC (rr)
-void CPU::DEC_MEM_HL() { uint16_t address = (H << 8) | L; uint8_t value = read(address); tickM(1); value--; write(address, value); tickM(1); }
+void CPU::DEC_MEM_HL() { uint16_t address = (H << 8) | L; uint8_t value = read(address); tickM(1); dec_reg(value); write(address, value); tickM(1); }
 //AND r
 //OR r
 //XOR r
@@ -461,10 +551,65 @@ void CPU::XOR_E() { uint8_t value = E; xor_a_value(value); }
 void CPU::XOR_H() { uint8_t value = H; xor_a_value(value); }
 void CPU::XOR_L() { uint8_t value = L; xor_a_value(value); }
 void CPU::XOR_HL() { uint8_t value = read((H << 8) | L); tickM(1); xor_a_value(value); }
+void CPU::XOR_d8() { uint8_t value = fetch8(); tickM(1); xor_a_value(value); }
 //SUB r
+void CPU::SUB_A() { uint8_t value = A; sub_a_value(value); }
+void CPU::SUB_B() { uint8_t value = B; sub_a_value(value); }
+void CPU::SUB_C() { uint8_t value = C; sub_a_value(value); }
+void CPU::SUB_D() { uint8_t value = D; sub_a_value(value); }
+void CPU::SUB_E() { uint8_t value = E; sub_a_value(value); }
+void CPU::SUB_H() { uint8_t value = H; sub_a_value(value); }
+void CPU::SUB_L() { uint8_t value = L; sub_a_value(value); }
+void CPU::SUB_HL() { uint8_t value = read((H << 8) | L); tickM(1); sub_a_value(value); }
+void CPU::SUB_d8() { uint8_t value = fetch8(); tickM(1); sub_a_value(value); }
 //ADD A,r
+void CPU::ADD_A_A() { add_a_value(A); }
+void CPU::ADD_A_B() { add_a_value(B); }
+void CPU::ADD_A_C() { add_a_value(C); }
+void CPU::ADD_A_D() { add_a_value(D); }
+void CPU::ADD_A_E() { add_a_value(E); }
+void CPU::ADD_A_H() { add_a_value(H); }
+void CPU::ADD_A_L() { add_a_value(L); }
+void CPU::ADD_A_d8() { uint8_t value = fetch8(); tickM(1); add_a_value(value); }
+//ADD A,(rr)
+void CPU::ADD_A_HL() { uint16_t address = (H << 8) | L; uint8_t value = read(address); tickM(1); add_a_value(value); }
 //ADD rr, rr
+void CPU::ADD_HL_BC() { uint16_t value = (B << 8) | C; tickM(1); add_hl_value(value); }
+void CPU::ADD_HL_DE() { uint16_t value = (D << 8) | E; tickM(1); add_hl_value(value); }
+void CPU::ADD_HL_HL() { uint16_t value = (H << 8) | L; tickM(1); add_hl_value(value); }
+void CPU::ADD_HL_SP() { uint16_t value = SP; tickM(1); add_hl_value(value); }
 //ADD rr, s8
+void CPU::ADD_SP_s8()
+{
+	int8_t value =
+		static_cast<int8_t>(fetch8());
+
+	tickM(1);
+
+	uint16_t unsignedValue =
+		static_cast<uint8_t>(value);
+
+	setFlag(
+		FLAG_H,
+		((SP & 0x0F) + (unsignedValue & 0x0F)) > 0x0F
+	);
+
+	setFlag(
+		FLAG_C,
+		((SP & 0xFF) + (unsignedValue & 0xFF)) > 0xFF
+	);
+
+	clearFlag(FLAG_Z);
+	clearFlag(FLAG_N);
+
+	tickM(1);
+
+	SP = static_cast<uint16_t>(
+		SP + value
+		);
+
+	tickM(1);
+}
 //LD r,r
 void CPU::LD_A_A() { ld_reg_reg(A, A); }
 void CPU::LD_A_B() { ld_reg_reg(A, B); }
@@ -536,8 +681,8 @@ void CPU::LD_E_HL() { E = read((H << 8) | L); tickM(1); }
 void CPU::LD_H_HL() { H = read((H << 8) | L); tickM(1); }
 void CPU::LD_L_HL() { L = read((H << 8) | L); tickM(1); }
 //LD (rr),r
-void CPU::LD_HL_M_A() { uint16_t HL = (H << 8) | L; tickM(1); write(HL, A); HL--; H = HL >> 8; L = HL & 0xFF; }
-void CPU::LD_HL_P_A() { uint16_t HL = (H << 8) | L; tickM(1); write(HL, A); HL++; H = HL >> 8; L = HL & 0xFF; }
+void CPU::LD_HL_M_A() { uint16_t HL = (H << 8) | L; write(HL, A); tickM(1); HL--; H = HL >> 8; L = HL & 0xFF; }
+void CPU::LD_HL_P_A() { uint16_t HL = (H << 8) | L; write(HL, A); tickM(1); HL++; H = HL >> 8; L = HL & 0xFF; }
 void CPU::LD_HL_A() { write((H << 8) | L, A); tickM(1); }
 void CPU::LD_HL_B() { write((H << 8) | L, B); tickM(1); }
 void CPU::LD_HL_C() { write((H << 8) | L, C); tickM(1); }

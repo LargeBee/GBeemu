@@ -24,4 +24,7 @@ struct TraceEntry
 
 	std::string instruction;
 	bool implemented;
+
+	//test
+	uint8_t scanline;
 };

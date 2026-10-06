@@ -1,6 +1,9 @@
 #pragma once
 #include <cstdint>
 
+#include <fstream>
+#include <iomanip>
+
 #include "Instruction.h"
 #include "TraceEntry.h"
 
@@ -42,6 +45,8 @@ public:
 	void setFlag(Flag flag);
 	void clearFlag(Flag flag);
 	void setFlag(Flag flag, bool value);
+
+	uint64_t getInstructionCount() const;
 	
 private:
 	Emulator& emulator;
@@ -69,6 +74,9 @@ private:
 	bool stopped;
 
 	TraceEntry lastTrace;
+	std::ofstream traceFile;
+
+	uint64_t instructionCount = 0;
 
 	void createTrace(
 		uint16_t pc,
@@ -89,6 +97,7 @@ private:
 
 	//Instruction Helpers
 	void xor_a_value(uint8_t v);
+	void sub_a_value(uint8_t v);
 	void bit_v_r(uint8_t v, uint8_t r);
 	void inc_reg(uint8_t& r);
 	void dec_reg(uint8_t& r);
@@ -100,6 +109,8 @@ private:
 	void rr_r(uint8_t& r);
 	void rr_rr(uint8_t h, uint8_t l);
 	void cp_value(uint8_t v);
+	void add_a_value(uint8_t value);
+	void add_hl_value(uint16_t value);
 
 	//Instructions
 	void NOP();
@@ -123,11 +134,24 @@ private:
 	//OR r
 	//XOR r
 	void XOR_A(); void XOR_B(); void XOR_C(); void XOR_D();
-	void XOR_E(); void XOR_H(); void XOR_L(); void XOR_HL();
+	void XOR_E(); void XOR_H(); void XOR_L(); void XOR_d8();
+	//XOR (rr)
+	void XOR_HL();
 	//SUB r
+	void SUB_A(); void SUB_B(); void SUB_C(); void SUB_D();
+	void SUB_E(); void SUB_H(); void SUB_L(); void SUB_d8();
+	//SUB (rr)
+	void SUB_HL();
 	//ADD A,r
+	void ADD_A_A(); void ADD_A_B(); void ADD_A_C(); void ADD_A_D();
+	void ADD_A_E(); void ADD_A_H(); void ADD_A_L(); void ADD_A_d8();
+	//ADD A,(rr)
+	void ADD_A_HL();
 	//ADD rr, rr
+	void ADD_HL_BC(); void ADD_HL_DE();	void ADD_HL_HL();
+	void ADD_HL_SP();
 	//ADD rr, s8
+	void ADD_SP_s8();
 	//LD r,r
 	void LD_A_A(); void LD_A_B(); void LD_A_C(); void LD_A_D();
 	void LD_A_E(); void LD_A_H(); void LD_A_L();

@@ -29,6 +29,11 @@ public:
 
 	const uint8_t* getFramebuffer() const;
 
+	bool isFrameReady() const;
+	void clearFrameReady();
+
+	uint8_t getLY() const;
+
 private:
 	static constexpr int WIDTH = 160;
 	static constexpr int HEIGHT = 144;
@@ -55,6 +60,8 @@ private:
 
 	uint16_t modeClock;
 	uint8_t mode;
+
+	bool frameReady;
 
 	uint8_t framebuffer[WIDTH * HEIGHT];
 

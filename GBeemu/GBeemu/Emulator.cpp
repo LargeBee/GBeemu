@@ -9,6 +9,8 @@
 #include "Cartridge.h"
 #include "Input.h"
 
+#include <windows.h>
+
 Emulator::Emulator()
 {
 	cycles = 0;
@@ -68,13 +70,28 @@ void Emulator::reset()
 
 void Emulator::tick()
 {
-	ppu->tick();
-	timer->tick();
-	dma->tick();
-	apu->tick();
-	input->tick();
-
 	cycles++;
+	ppu->tick();
+
+	/*if (ppu->getLY() != previousLy)
+	{
+		char buffer[64];
+
+		sprintf_s(
+			buffer,
+			"LY %02X at %llu T\n",
+			ppu->getLY(),
+			static_cast<unsigned long long>(cycles)
+		);
+
+		OutputDebugStringA(buffer);
+		previousLy = ppu->getLY();
+	}*/
+
+	//timer->tick();
+	//dma->tick();
+	//apu->tick();
+	//input->tick();
 }
 
 void Emulator::update()
@@ -82,7 +99,10 @@ void Emulator::update()
 	if (!running)
 		return;
 
-	stepInstruction();
+	while (!isFrameReady() && running)
+	{
+		stepInstruction();
+	}
 }
 
 void Emulator::stepInstruction()
@@ -225,4 +245,19 @@ bool Emulator::loadROM(const std::string& path)
 const uint8_t* Emulator::getFramebuffer() const
 {
 	return ppu->getFramebuffer();
+}
+
+bool Emulator::isFrameReady() const
+{
+	return ppu->isFrameReady();
+}
+
+void Emulator::clearFrameReady()
+{
+	ppu->clearFrameReady();
+}
+
+uint64_t Emulator::getInstructionCount() const
+{
+	return cpu->getInstructionCount();
 }

@@ -6,6 +6,7 @@ CPU::CPU(Emulator& emulator, Bus& bus)
 	: emulator(emulator),
 	bus(bus)
 {
+	traceFile.open("trace.txt");
 	reset();
 
 	buildInstructionTables();
@@ -76,6 +77,38 @@ void CPU::createTrace(
 
 	lastTrace.instruction =
 		instruction.mnemonic;
+
+	lastTrace.scanline = read(0xFF44);
+	
+	/*
+	std::ofstream traceFile("trace.txt", std::ios::app);
+
+	traceFile
+		<< "A: " << std::uppercase << std::hex << std::setfill('0') << std::setw(2) << (int)lastTrace.a
+		<< " F: " << std::setw(2) << (int)lastTrace.f
+		<< " B: " << std::setw(2) << (int)lastTrace.b
+		<< " C: " << std::setw(2) << (int)lastTrace.c
+		<< " D: " << std::setw(2) << (int)lastTrace.d
+		<< " E: " << std::setw(2) << (int)lastTrace.e
+		<< " H: " << std::setw(2) << (int)lastTrace.h
+		<< " L: " << std::setw(2) << (int)lastTrace.l
+		<< " SP: " << std::setw(4) << (int)lastTrace.sp
+		<< " PC: 00:" << std::setw(4) << (int)lastTrace.pc
+		<< " (";
+
+	// Output the opcode and following 3 bytes
+	for (int i = 0; i < 4; i++)
+	{
+		uint8_t value = read(pc + i);
+
+		traceFile << std::setw(2) << (int)value;
+
+		if (i < 3)
+			traceFile << " ";
+	}
+
+	traceFile << ")\n";
+	*/
 }
 
 void CPU::idle()
@@ -119,6 +152,7 @@ void CPU::step()
 		}
 
 		executeCB(cbOpcode);
+		instructionCount++;
 		return;
 	}
 
@@ -138,6 +172,8 @@ void CPU::step()
 	}
 
 	executeOpcode(opcode);
+
+	instructionCount++;
 }
 
 void CPU::executeOpcode(uint8_t opcode)
@@ -221,4 +257,9 @@ void CPU::setFlag(Flag flag, bool value)
 	{
 		clearFlag(flag);
 	}
+}
+
+uint64_t CPU::getInstructionCount() const
+{
+	return instructionCount;
 }

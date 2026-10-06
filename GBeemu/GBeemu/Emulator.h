@@ -58,6 +58,11 @@ public:
 
 	void clearTrace();
 
+	bool isFrameReady() const;
+	void clearFrameReady();
+
+	uint64_t getInstructionCount() const;
+
 private:
 	Cartridge* cartridge;
 	Bus* bus;
@@ -70,6 +75,8 @@ private:
 
 	uint64_t cycles;
 	bool running;
+
+	uint8_t previousLy = 0;
 
 	std::vector<TraceEntry> trace;
 };

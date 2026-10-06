@@ -28,6 +28,8 @@ void PPU::reset()
 	modeClock = 0;
 	mode = MODE_OAM;
 
+	frameReady = false;
+
 	for (int i = 0; i < 0x2000; i++)
 	{
 		vram[i] = 0;
@@ -84,6 +86,7 @@ void PPU::tick()
 			if (ly >= 144)
 			{
 				mode = MODE_VBLANK;
+				frameReady = true;
 				bus->requestInterrupt(0);
 			}
 			else
@@ -249,9 +252,6 @@ void PPU::renderScanline()
 		uint8_t tileX =
 			worldX / 8;
 
-		uint8_t pixelX =
-			worldX & 7;
-
 		uint16_t tileMapAddress =
 			tileMapBase +
 			(tileY * 32) +
@@ -262,6 +262,9 @@ void PPU::renderScanline()
 
 		uint16_t tileAddress =
 			getTileAddress(tile);
+
+		uint8_t pixelX =
+			worldX & 7;
 
 		uint8_t bit =
 			7 - pixelX;
@@ -275,11 +278,15 @@ void PPU::renderScanline()
 		uint8_t colour =
 			(high << 1) | low;
 
+		uint8_t shade =
+			(bgp >> (colour * 2)) & 0x03;
+
 		framebuffer[
 			ly * 160 + screenX
-		] = colour;
+		] = shade;
 	}
 }
+
 
 uint16_t PPU::getTileAddress(uint8_t tile)
 {
@@ -298,4 +305,19 @@ uint16_t PPU::getTileAddress(uint8_t tile)
 const uint8_t* PPU::getFramebuffer() const
 {
 	return framebuffer;
+}
+
+bool PPU::isFrameReady() const
+{
+	return frameReady;
+}
+
+void PPU::clearFrameReady()
+{
+	frameReady = false;
+}
+
+uint8_t PPU::getLY() const
+{
+	return ly;
 }
