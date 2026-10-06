@@ -12,6 +12,7 @@ void CPU::buildInstructionTables()
 	//0x00 - 0x0F
 	instructions[0x00] = { "NOP", &CPU::NOP, 1, 4 };
 	instructions[0x01] = { "LD BC,d16" , &CPU::LD_BC_d16, 3, 12 };
+	instructions[0x02] = { "LD (BC),A", &CPU::LD_BC_A, 1, 8 };
 	instructions[0x03] = { "INC BC", &CPU::INC_BC, 1, 8 };
 	instructions[0x04] = { "INC B", &CPU::INC_B,  1, 4 };
 	instructions[0x05] = { "DEC B", &CPU::DEC_B, 1, 4 };
@@ -27,6 +28,7 @@ void CPU::buildInstructionTables()
 	instructions[0x0F] = { "RRCA", &CPU::RRCA, 1, 4 };
 
 	instructions[0x11] = { "LD DE,d16", &CPU::LD_DE_d16,  3, 12 };
+	instructions[0x12] = { "LD (DE),A", &CPU::LD_DE_A, 1, 8 };
 	instructions[0x13] = { "INC DE", &CPU::INC_DE, 1, 8 };
 	instructions[0x14] = { "INC D", &CPU::INC_D,  1, 4 };
 	instructions[0x15] = { "DEC D", &CPU::DEC_D, 1, 4 };
@@ -62,6 +64,7 @@ void CPU::buildInstructionTables()
 	instructions[0x33] = { "INC SP", &CPU::INC_SP, 1, 8 };
 	instructions[0x34] = { "INC (HL)", &CPU::INC_MEM_HL, 1, 12 };
 	instructions[0x35] = { "DEC (HL)", &CPU::DEC_MEM_HL, 1, 12 };
+	instructions[0x36] = { "LD (HL),d8", &CPU::LD_HL_d8, 2, 12 };
 	instructions[0x38] = { "JR C,s8", &CPU::JR_C_s8, 2, 8 };
 	instructions[0x39] = { "ADD HL,SP", &CPU::ADD_HL_SP, 1, 8 };
 	instructions[0x3A] = { "LD A,(HL-)", &CPU::LD_A_HL_M, 1, 8 };
@@ -172,6 +175,14 @@ void CPU::buildInstructionTables()
 	instructions[0xAE] = { "XOR (HL)", &CPU::XOR_HL,  1, 8 };
 	instructions[0xAF] = { "XOR A", &CPU::XOR_A,  1, 4 };
 
+	instructions[0xB0] = { "OR B", &CPU::OR_B, 1, 4 };
+	instructions[0xB1] = { "OR C", &CPU::OR_C, 1, 4 };
+	instructions[0xB2] = { "OR D", &CPU::OR_D, 1, 4 };
+	instructions[0xB3] = { "OR E", &CPU::OR_E, 1, 4 };
+	instructions[0xB4] = { "OR H", &CPU::OR_H, 1, 4 };
+	instructions[0xB5] = { "OR L", &CPU::OR_L, 1, 4 };
+	instructions[0xB6] = { "OR (HL)", &CPU::OR_HL, 1, 8 };
+	instructions[0xB7] = { "OR A", &CPU::OR_A, 1, 4 };
 	instructions[0xB8] = { "CP B", &CPU::CP_B, 1, 4 };
 	instructions[0xB9] = { "CP C", &CPU::CP_C, 1, 4 };
 	instructions[0xBA] = { "CP D", &CPU::CP_D, 1, 4 };
@@ -219,6 +230,9 @@ void CPU::buildInstructionTables()
 	instructions[0xF1] = { "POP AF", &CPU::POP_AF, 1, 12 };
 	instructions[0xF2] = { "LD A,(C)", &CPU::LD_A_aC, 1, 8 };
 	instructions[0xF5] = { "PUSH AF", &CPU::PUSH_AF, 1, 16 };
+	instructions[0xF6] = { "OR d8", &CPU::OR_d8, 2, 8 };
+	instructions[0xF8] = { "LD HL,SP+s8", &CPU::LD_HL_SP_s8, 2, 12 };
+	instructions[0xF9] = { "LD SP,HL", &CPU::LD_SP_HL, 1, 8 };
 	instructions[0xFA] = { "LD A,(a16)", &CPU::LD_A_a16, 3, 16 };
 	instructions[0xFE] = { "CP d8", &CPU::CP_d8, 2, 8 };
 
@@ -239,6 +253,23 @@ void CPU::buildInstructionTables()
 	cbInstructions[0x1D] = { "RR L", &CPU::RR_L, 2, 8 };
 	cbInstructions[0x1E] = { "RR (HL)", &CPU::RR_HL, 2, 16 };
 	cbInstructions[0x1F] = { "RR A", &CPU::RR_A, 2, 8 };
+
+	cbInstructions[0x20] = { "SLA B", &CPU::SLA_B, 2, 8 };
+	cbInstructions[0x21] = { "SLA C", &CPU::SLA_C, 2, 8 };
+	cbInstructions[0x22] = { "SLA D", &CPU::SLA_D, 2, 8 };
+	cbInstructions[0x23] = { "SLA E", &CPU::SLA_E, 2, 8 };
+	cbInstructions[0x24] = { "SLA H", &CPU::SLA_H, 2, 8 };
+	cbInstructions[0x25] = { "SLA L", &CPU::SLA_L, 2, 8 };
+	cbInstructions[0x26] = { "SLA (HL)", &CPU::SLA_HL, 2, 16 };
+	cbInstructions[0x27] = { "SLA A", &CPU::SLA_A, 2, 8 };
+	cbInstructions[0x28] = { "SRA B", &CPU::SRA_B, 2, 8 };
+	cbInstructions[0x29] = { "SRA C", &CPU::SRA_C, 2, 8 };
+	cbInstructions[0x2A] = { "SRA D", &CPU::SRA_D, 2, 8 };
+	cbInstructions[0x2B] = { "SRA E", &CPU::SRA_E, 2, 8 };
+	cbInstructions[0x2C] = { "SRA H", &CPU::SRA_H, 2, 8 };
+	cbInstructions[0x2D] = { "SRA L", &CPU::SRA_L, 2, 8 };
+	cbInstructions[0x2E] = { "SRA (HL)", &CPU::SRA_HL, 2, 16 };
+	cbInstructions[0x2F] = { "SRA A", &CPU::SRA_A, 2, 8 };
 
 	//0x40 - 0x4F
 	cbInstructions[0x40] = { "BIT 0,B", &CPU::BIT_0_B, 2, 8 };
@@ -387,6 +418,16 @@ void CPU::xor_a_value(uint8_t v)
 	uint8_t result = A ^ v;
 	A = result;
 	setFlag(FLAG_Z, result == 0);
+	clearFlag(FLAG_N);
+	clearFlag(FLAG_H);
+	clearFlag(FLAG_C);
+}
+
+void CPU::or_a_value(uint8_t value)
+{
+	A |= value;
+
+	setFlag(FLAG_Z, A == 0);
 	clearFlag(FLAG_N);
 	clearFlag(FLAG_H);
 	clearFlag(FLAG_C);
@@ -595,6 +636,72 @@ void CPU::and_a_value(uint8_t value)
 	clearFlag(FLAG_C);
 }
 
+void CPU::sla_r(uint8_t& reg)
+{
+	uint8_t old = reg;
+
+	setFlag(FLAG_C, old & 0x80);
+
+	reg = old << 1;
+
+	setFlag(FLAG_Z, reg == 0);
+	clearFlag(FLAG_N);
+	clearFlag(FLAG_H);
+}
+
+void CPU::sla_hl()
+{
+	uint16_t address = (H << 8) | L;
+	uint8_t value = read(address);
+
+	tickM(1);
+
+	setFlag(FLAG_C, value & 0x80);
+
+	value <<= 1;
+
+	write(address, value);
+
+	tickM(1);
+
+	setFlag(FLAG_Z, value == 0);
+	clearFlag(FLAG_N);
+	clearFlag(FLAG_H);
+}
+
+void CPU::sra_r(uint8_t& reg)
+{
+	uint8_t old = reg;
+
+	setFlag(FLAG_C, old & 0x01);
+
+	reg = (old >> 1) | (old & 0x80);
+
+	setFlag(FLAG_Z, reg == 0);
+	clearFlag(FLAG_N);
+	clearFlag(FLAG_H);
+}
+
+void CPU::sra_hl()
+{
+	uint16_t address = (H << 8) | L;
+	uint8_t value = read(address);
+
+	tickM(1);
+
+	setFlag(FLAG_C, value & 0x01);
+
+	value = (value >> 1) | (value & 0x80);
+
+	write(address, value);
+
+	tickM(1);
+
+	setFlag(FLAG_Z, value == 0);
+	clearFlag(FLAG_N);
+	clearFlag(FLAG_H);
+}
+
 //Hardware Instructions
 void CPU::NOP() { return; }
 //INC r
@@ -639,6 +746,15 @@ void CPU::AND_d8() { uint8_t value = fetch8(); tickM(1); and_a_value(value); }
 //AND (rr)
 void CPU::AND_HL() { uint16_t address = (H << 8) | L; uint8_t value = read(address); tickM(1); and_a_value(value); }
 //OR r
+void CPU::OR_A() { or_a_value(A); }
+void CPU::OR_B() { or_a_value(B); }
+void CPU::OR_C() { or_a_value(C); }
+void CPU::OR_D() { or_a_value(D); }
+void CPU::OR_E() { or_a_value(E); }
+void CPU::OR_H() { or_a_value(H); }
+void CPU::OR_L() { or_a_value(L); }
+void CPU::OR_HL() { uint8_t value = read((H << 8) | L); tickM(1); or_a_value(value); }
+void CPU::OR_d8() { uint8_t value = fetch8(); tickM(1); or_a_value(value); }
 //XOR r
 void CPU::XOR_A() {	uint8_t value = A; xor_a_value(value); }
 void CPU::XOR_B() { uint8_t value = B; xor_a_value(value); }
@@ -796,6 +912,38 @@ void CPU::LD_DE_d16() { uint8_t tE = fetch8(); tickM(1); uint8_t tD = fetch8();	
 void CPU::LD_HL_d16() { uint8_t tL = fetch8(); tickM(1); uint8_t tH = fetch8();	tickM(1); L = tL; H = tH; }
 void CPU::LD_SP_d16() {	uint8_t low = fetch8();	tickM(1); uint8_t high = fetch8(); tickM(1); SP = low | (high << 8); }
 //LD rr,rr
+void CPU::LD_SP_HL() { SP = (H << 8) | L; tickM(1); }
+void CPU::LD_HL_SP_s8()
+{
+	int8_t value =
+		static_cast<int8_t>(fetch8());
+
+	tickM(1);
+
+	uint16_t unsignedValue =
+		static_cast<uint8_t>(value);
+
+	setFlag(
+		FLAG_H,
+		((SP & 0x0F) + (unsignedValue & 0x0F)) > 0x0F
+	);
+
+	setFlag(
+		FLAG_C,
+		((SP & 0xFF) + (unsignedValue & 0xFF)) > 0xFF
+	);
+
+	clearFlag(FLAG_Z);
+	clearFlag(FLAG_N);
+
+	uint16_t result =
+		static_cast<uint16_t>(SP + value);
+
+	tickM(1);
+
+	H = result >> 8;
+	L = result & 0xFF;
+}
 // (addr),r
 void CPU::LD_aC_A() { write(0xFF00 | C, A);	tickM(1); }
 void CPU::LD_a8_A() { uint8_t value = fetch8(); tickM(1); write(0xFF00 | value, A); tickM(1); }
@@ -851,7 +999,24 @@ void CPU::RET_C() { tickM(1); if (getFlag(FLAG_C)) { uint8_t low = read(SP); SP+
 void CPU::RET_NZ() { tickM(1); if (!getFlag(FLAG_Z)) { uint8_t low = read(SP); SP++; tickM(1); uint8_t high = read(SP); SP++; tickM(1); PC = (high << 8) | low; tickM(1); } }
 void CPU::RET_NC() { tickM(1); if (!getFlag(FLAG_C)) { uint8_t low = read(SP); SP++; tickM(1); uint8_t high = read(SP); SP++; tickM(1); PC = (high << 8) | low; tickM(1); } }
 void CPU::RETI() { uint8_t low = read(SP); SP++; tickM(1); uint8_t high = read(SP); SP++; tickM(1); PC = (high << 8) | low; ime = true; tickM(1); }
-
+//SLA r
+void CPU::SLA_A() { sla_r(A); }
+void CPU::SLA_B() { sla_r(B); }
+void CPU::SLA_C() { sla_r(C); }
+void CPU::SLA_D() { sla_r(D); }
+void CPU::SLA_E() { sla_r(E); }
+void CPU::SLA_H() { sla_r(H); }
+void CPU::SLA_L() { sla_r(L); }
+void CPU::SLA_HL() { sla_hl(); }
+//SRA r
+void CPU::SRA_A() { sra_r(A); }
+void CPU::SRA_B() { sra_r(B); }
+void CPU::SRA_C() { sra_r(C); }
+void CPU::SRA_D() { sra_r(D); }
+void CPU::SRA_E() { sra_r(E); }
+void CPU::SRA_H() { sra_r(H); }
+void CPU::SRA_L() { sra_r(L); }
+void CPU::SRA_HL() { sra_hl(); }
 //BIT v,r
 void CPU::BIT_0_A() { bit_v_r(0, A); }
 void CPU::BIT_0_B() { bit_v_r(0, B); }

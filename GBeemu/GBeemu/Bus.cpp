@@ -275,7 +275,7 @@ void Bus::write(uint16_t address, uint8_t value)
 			return;
 		case 0xFF50:
 			if (value != 0)
-				bootROMEnabled = true;
+				bootROMEnabled = false;
 			return;
 
 		default:

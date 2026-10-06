@@ -97,6 +97,7 @@ private:
 
 	//Instruction Helpers
 	void xor_a_value(uint8_t v);
+	void or_a_value(uint8_t v);
 	void sub_a_value(uint8_t v);
 	void bit_v_r(uint8_t v, uint8_t r);
 	void inc_reg(uint8_t& r);
@@ -112,6 +113,10 @@ private:
 	void add_a_value(uint8_t value);
 	void add_hl_value(uint16_t value);
 	void and_a_value(uint8_t v);
+	void sla_r(uint8_t& reg);
+	void sla_hl();
+	void sra_r(uint8_t& reg);
+	void sra_hl();
 
 	//Instructions
 	void NOP();
@@ -137,6 +142,10 @@ private:
 	//AND (rr)
 	void AND_HL();
 	//OR r
+	void OR_A(); void OR_B(); void OR_C(); void OR_D();
+	void OR_E(); void OR_H(); void OR_L(); void OR_d8();
+	//OR (rr)
+	void OR_HL();
 	//XOR r
 	void XOR_A(); void XOR_B(); void XOR_C(); void XOR_D();
 	void XOR_E(); void XOR_H(); void XOR_L(); void XOR_d8();
@@ -173,7 +182,6 @@ private:
 	void LD_L_A(); void LD_L_B(); void LD_L_C(); void LD_L_D();
 	void LD_L_E(); void LD_L_H(); void LD_L_L();
 	//LD r,d8
-	//LD r,d8
 	void LD_A_d8(); void LD_B_d8(); void LD_C_d8(); void LD_D_d8();
 	void LD_E_d8(); void LD_H_d8(); void LD_L_d8();
 	//LD r,(rr)
@@ -193,6 +201,7 @@ private:
 	void LD_HL_d16();
 	void LD_SP_d16();
 	//LD rr,rr
+	void LD_SP_HL(); void LD_HL_SP_s8();
 	//LD (addr),r
 	void LD_aC_A(); void LD_a8_A(); void LD_a16_A(); void LD_a16_SP();
 	//LD r,(addr)
@@ -221,6 +230,12 @@ private:
 	void RET(); void RETI();
 	void RET_Z(); void RET_C();
 	void RET_NZ(); void RET_NC();
+	//SLA
+	void SLA_A(); void SLA_B(); void SLA_C(); void SLA_D();
+	void SLA_E(); void SLA_H(); void SLA_L(); void SLA_HL();
+	//SRA r
+	void SRA_A(); void SRA_B(); void SRA_C(); void SRA_D();
+	void SRA_E(); void SRA_H(); void SRA_L(); void SRA_HL();
 	//BIT v,r
 	void BIT_0_A(); void BIT_0_B(); void BIT_0_C(); void BIT_0_D();
 	void BIT_0_E(); void BIT_0_H(); void BIT_0_L(); void BIT_0_HL();
