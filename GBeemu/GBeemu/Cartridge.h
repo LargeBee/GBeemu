@@ -28,8 +28,9 @@ private:
 	uint8_t romSize;
 	uint8_t ramSize;
 
-	uint8_t romBank;
 	uint8_t ramBank;
+
+	uint16_t mbc5RomBank;
 
 	bool ramEnable;
 

@@ -75,11 +75,11 @@ uint8_t Bus::read(uint16_t address)
 
 	// VRAM
 	if (address >= 0x8000 && address <= 0x9FFF)
-		return ppu->read(address - 0x8000);
+		return ppu->read(address);
 
 	// Cartridge RAM
 	if (address >= 0xA000 && address <= 0xBFFF)
-		return cartridge.read(address - 0xA000);
+		return cartridge.read(address);
 
 	// Work RAM
 	if (address >= 0xC000 && address <= 0xDFFF)
@@ -91,7 +91,7 @@ uint8_t Bus::read(uint16_t address)
 
 	// OAM
 	if (address >= 0xFE00 && address <= 0xFE9F)
-		return ppu->read(address - 0xFE00);
+		return ppu->read(address);
 
 	// Unusable memory
 	if (address >= 0xFEA0 && address <= 0xFEFF)
@@ -150,6 +150,9 @@ uint8_t Bus::read(uint16_t address)
 		case 0xFF4A:
 		case 0xFF4B:
 			return ppu->read(address);
+
+		case 0xFF46:
+			return dma->read(address);
 
 		default:
 			return 0xFF;
@@ -278,10 +281,15 @@ void Bus::write(uint16_t address, uint8_t value)
 				bootROMEnabled = false;
 			return;
 
+		case 0xFF46:
+			dma->write(address, value);
+			return;
+
 		default:
 			return;
 		}
 	}
+
 
 	// HRAM
 	if (address >= 0xFF80 && address <= 0xFFFE)

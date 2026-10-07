@@ -81,10 +81,10 @@ void CPU::createTrace(
 
 	lastTrace.scanline = read(0xFF44);
 	
-	/*
-	std::ofstream traceFile("trace.txt", std::ios::app);
+	
+	//std::ofstream traceFile("trace.txt", std::ios::app);
 
-	traceFile
+	/*traceFile
 		<< "A: " << std::uppercase << std::hex << std::setfill('0') << std::setw(2) << (int)lastTrace.a
 		<< " F: " << std::setw(2) << (int)lastTrace.f
 		<< " B: " << std::setw(2) << (int)lastTrace.b
@@ -108,8 +108,8 @@ void CPU::createTrace(
 			traceFile << " ";
 	}
 
-	traceFile << ")\n";
-	*/
+	traceFile << ")\n";*/
+	
 }
 
 void CPU::idle()
@@ -303,7 +303,8 @@ bool CPU::handleInterrupts()
 	uint8_t IE = read(0xFFFF);
 	uint8_t IF = read(0xFF0F);
 
-	uint8_t pending = IE & IF & 0x1F;
+	uint8_t pending =
+		IE & IF & 0x1F;
 
 	if (pending == 0)
 		return false;
@@ -347,10 +348,11 @@ bool CPU::handleInterrupts()
 		vector = 0x0060;
 	}
 
+	tickM(2);
+
+	IF = read(0xFF0F);
 	IF &= ~(1 << interruptBit);
 	write(0xFF0F, IF);
-
-	tickM(2);
 
 	SP--;
 	write(SP, PC >> 8);

@@ -88,8 +88,8 @@ void Emulator::tick()
 		previousLy = ppu->getLY();
 	}*/
 
-	//timer->tick();
-	//dma->tick();
+	timer->tick();
+	dma->tick();
 	//apu->tick();
 	input->tick();
 }
@@ -113,6 +113,11 @@ void Emulator::update()
 void Emulator::stepInstruction()
 {
 	cpu->step();
+
+	if (cpu->getInstructionCount() == lastTracedInstruction)
+		return;
+
+	lastTracedInstruction = cpu->getInstructionCount();
 
 	trace.push_back(
 		cpu->getLastTrace()

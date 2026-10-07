@@ -23,5 +23,6 @@ private:
 	uint8_t source;
 	uint16_t index;
 
+	uint8_t cycle;
 	bool active;
 };

@@ -80,5 +80,7 @@ private:
 
 	uint8_t previousLy = 0;
 
+	uint64_t lastTracedInstruction = 0;
+
 	std::vector<TraceEntry> trace;
 };

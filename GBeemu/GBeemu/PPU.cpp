@@ -1,5 +1,6 @@
 #include "PPU.h"
 #include "Bus.h"
+#include <algorithm>
 
 PPU::PPU()
 {
@@ -222,61 +223,118 @@ void PPU::write(uint16_t address, uint8_t value)
 	}
 }
 
-void PPU::renderScanline()
+void PPU::renderBackgroundAndWindow()
 {
-	if (!(lcdc & 0x80))
-		return;
-
-	if (!(lcdc & 0x01))
-		return;
-
-	uint8_t worldY =
-		(ly + scy) & 0xFF;
-
-	uint8_t tileY =
-		worldY / 8;
-
-	uint8_t pixelY =
-		worldY & 7;
-
-	uint16_t tileMapBase =
-		(lcdc & 0x08)
-		? 0x1C00
-		: 0x1800;
-
 	for (int screenX = 0; screenX < 160; screenX++)
 	{
-		uint8_t worldX =
-			(screenX + scx) & 0xFF;
+		uint8_t colour = 0;
 
-		uint8_t tileX =
-			worldX / 8;
+		// Background
+		if (lcdc & 0x01)
+		{
+			uint8_t worldY =
+				(ly + scy) & 0xFF;
 
-		uint16_t tileMapAddress =
-			tileMapBase +
-			(tileY * 32) +
-			tileX;
+			uint8_t worldX =
+				(screenX + scx) & 0xFF;
 
-		uint8_t tile =
-			vram[tileMapAddress];
+			uint8_t tileY =
+				worldY / 8;
 
-		uint16_t tileAddress =
-			getTileAddress(tile);
+			uint8_t tileX =
+				worldX / 8;
 
-		uint8_t pixelX =
-			worldX & 7;
+			uint8_t pixelY =
+				worldY & 7;
 
-		uint8_t bit =
-			7 - pixelX;
+			uint8_t pixelX =
+				worldX & 7;
 
-		uint8_t low =
-			(vram[tileAddress + pixelY * 2] >> bit) & 1;
+			uint16_t tileMapBase =
+				(lcdc & 0x08)
+				? 0x1C00
+				: 0x1800;
 
-		uint8_t high =
-			(vram[tileAddress + pixelY * 2 + 1] >> bit) & 1;
+			uint16_t tileMapAddress =
+				tileMapBase +
+				(tileY * 32) +
+				tileX;
 
-		uint8_t colour =
-			(high << 1) | low;
+			uint8_t tile =
+				vram[tileMapAddress];
+
+			uint16_t tileAddress =
+				getTileAddress(tile);
+
+			uint8_t bit =
+				7 - pixelX;
+
+			uint8_t low =
+				(vram[tileAddress + pixelY * 2] >> bit) & 1;
+
+			uint8_t high =
+				(vram[tileAddress + pixelY * 2 + 1] >> bit) & 1;
+
+			colour =
+				(high << 1) | low;
+		}
+
+		// Window
+		int windowX =
+			static_cast<int>(wx) - 7;
+
+		if ((lcdc & 0x20) &&
+			ly >= wy &&
+			screenX >= windowX)
+		{
+			uint8_t windowPixelX =
+				screenX - windowX;
+
+			uint8_t windowPixelY =
+				ly - wy;
+
+			uint8_t tileX =
+				windowPixelX / 8;
+
+			uint8_t tileY =
+				windowPixelY / 8;
+
+			uint8_t pixelX =
+				windowPixelX & 7;
+
+			uint8_t pixelY =
+				windowPixelY & 7;
+
+			uint16_t tileMapBase =
+				(lcdc & 0x40)
+				? 0x1C00
+				: 0x1800;
+
+			uint16_t tileMapAddress =
+				tileMapBase +
+				(tileY * 32) +
+				tileX;
+
+			uint8_t tile =
+				vram[tileMapAddress];
+
+			uint16_t tileAddress =
+				getTileAddress(tile);
+
+			uint8_t bit =
+				7 - pixelX;
+
+			uint8_t low =
+				(vram[tileAddress + pixelY * 2] >> bit) & 1;
+
+			uint8_t high =
+				(vram[tileAddress + pixelY * 2 + 1] >> bit) & 1;
+
+			colour =
+				(high << 1) | low;
+		}
+
+		bgColourLine[screenX] = colour;
 
 		uint8_t shade =
 			(bgp >> (colour * 2)) & 0x03;
@@ -284,6 +342,194 @@ void PPU::renderScanline()
 		framebuffer[
 			ly * 160 + screenX
 		] = shade;
+	}
+}
+
+void PPU::renderSprites()
+{
+	struct ScanlineSprite
+	{
+		int index;
+
+		uint8_t x;
+		uint8_t y;
+		uint8_t tile;
+		uint8_t attributes;
+	};
+
+	ScanlineSprite sprites[10];
+
+	int spriteCount = 0;
+
+	int spriteHeight =
+		(lcdc & 0x04) ? 16 : 8;
+
+	// Find the first 10 sprites in OAM that overlap
+	// the current scanline.
+	for (int i = 0; i < 40; i++)
+	{
+		uint8_t y =
+			oam[i * 4];
+
+		uint8_t x =
+			oam[i * 4 + 1];
+
+		uint8_t tile =
+			oam[i * 4 + 2];
+
+		uint8_t attributes =
+			oam[i * 4 + 3];
+
+		int spriteY =
+			static_cast<int>(y) - 16;
+
+		if (ly < spriteY ||
+			ly >= spriteY + spriteHeight)
+		{
+			continue;
+		}
+
+		sprites[spriteCount] =
+		{
+			i,
+			x,
+			y,
+			tile,
+			attributes
+		};
+
+		spriteCount++;
+
+		if (spriteCount == 10)
+			break;
+	}
+
+	// On DMG, lower X has higher priority.
+	// If X is the same, lower OAM index has higher priority.
+	std::sort(
+		sprites,
+		sprites + spriteCount,
+		[](const ScanlineSprite& a, const ScanlineSprite& b)
+		{
+			if (a.x != b.x)
+				return a.x < b.x;
+
+			return a.index < b.index;
+		}
+	);
+
+	// Draw lowest priority first so that higher priority
+	// sprites overwrite them.
+	for (int i = spriteCount - 1; i >= 0; i--)
+	{
+		ScanlineSprite& sprite =
+			sprites[i];
+
+		int spriteY =
+			static_cast<int>(sprite.y) - 16;
+
+		int spriteX =
+			static_cast<int>(sprite.x) - 8;
+
+		uint8_t tile =
+			sprite.tile;
+
+		uint8_t attributes =
+			sprite.attributes;
+
+		int pixelY =
+			ly - spriteY;
+
+		// Y flip
+		if (attributes & 0x40)
+		{
+			pixelY =
+				spriteHeight - 1 - pixelY;
+		}
+
+		// In 8x16 mode, bit 0 of the tile number is ignored.
+		if (spriteHeight == 16)
+		{
+			tile &= 0xFE;
+
+			if (pixelY >= 8)
+			{
+				tile++;
+				pixelY -= 8;
+			}
+		}
+
+		uint16_t tileAddress =
+			static_cast<uint16_t>(tile) * 16;
+
+		uint8_t low =
+			vram[tileAddress + pixelY * 2];
+
+		uint8_t high =
+			vram[tileAddress + pixelY * 2 + 1];
+
+		for (int pixelX = 0; pixelX < 8; pixelX++)
+		{
+			int screenX =
+				spriteX + pixelX;
+
+			if (screenX < 0 || screenX >= 160)
+				continue;
+
+			int bit;
+
+			// X flip
+			if (attributes & 0x20)
+			{
+				bit = pixelX;
+			}
+			else
+			{
+				bit = 7 - pixelX;
+			}
+
+			uint8_t colour =
+				(((high >> bit) & 1) << 1) |
+				((low >> bit) & 1);
+
+			// Sprite colour 0 is transparent.
+			if (colour == 0)
+				continue;
+
+			// Attribute bit 7:
+			// sprite is behind non-zero BG/window pixels.
+			if ((attributes & 0x80) &&
+				bgColourLine[screenX] != 0)
+			{
+				continue;
+			}
+
+			// Attribute bit 4 selects the sprite palette.
+			uint8_t palette =
+				(attributes & 0x10)
+				? obp1
+				: obp0;
+
+			uint8_t shade =
+				(palette >> (colour * 2)) & 0x03;
+
+			framebuffer[
+				ly * 160 + screenX
+			] = shade;
+		}
+	}
+}
+
+void PPU::renderScanline()
+{
+	if (!(lcdc & 0x80))
+		return;
+
+	renderBackgroundAndWindow();
+
+	if (lcdc & 0x02)
+	{
+		renderSprites();
 	}
 }
 
@@ -298,8 +544,8 @@ uint16_t PPU::getTileAddress(uint8_t tile)
 	int8_t signedTile =
 		static_cast<int8_t>(tile);
 
-	return 0x1000 +
-		((signedTile + 128) * 16);
+	return static_cast<uint16_t>(
+		0x1000 + signedTile * 16);
 }
 
 const uint8_t* PPU::getFramebuffer() const

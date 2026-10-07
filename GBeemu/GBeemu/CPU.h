@@ -131,6 +131,17 @@ private:
 	void sra_hl();
 	void srl_r(uint8_t& reg);
 	void srl_hl();
+	void adc_a_value(uint8_t v);
+	void swap_r(uint8_t& reg);
+	void swap_hl();
+	void sbc_a_value(uint8_t v);
+	void rst(uint16_t address);
+	void rlc_r(uint8_t& reg);
+	void rlc_hl();
+	void rrc_r(uint8_t& reg);
+	void rrc_hl();
+	void set_r(uint8_t& reg, uint8_t bit);
+	void set_hl(uint8_t bit);
 
 	//Instructions
 	void NOP(); void EI(); void DI(); void STOP(); void DAA();
@@ -245,6 +256,15 @@ private:
 	void RET(); void RETI();
 	void RET_Z(); void RET_C();
 	void RET_NZ(); void RET_NC();
+	//RST v
+	void RST_0();
+	void RST_1();
+	void RST_2();
+	void RST_3();
+	void RST_4();
+	void RST_5();
+	void RST_6();
+	void RST_7();
 	//SLA
 	void SLA_A(); void SLA_B(); void SLA_C(); void SLA_D();
 	void SLA_E(); void SLA_H(); void SLA_L(); void SLA_HL();
@@ -286,6 +306,22 @@ private:
 	void RES_7_A(); void RES_7_B(); void RES_7_C(); void RES_7_D();
 	void RES_7_E(); void RES_7_H(); void RES_7_L(); void RES_7_HL();
 	//SET v,r
+	void SET_0_A(); void SET_0_B(); void SET_0_C(); void SET_0_D();
+	void SET_0_E(); void SET_0_H(); void SET_0_L();void SET_0_HL();
+	void SET_1_A(); void SET_1_B(); void SET_1_C(); void SET_1_D();
+	void SET_1_E(); void SET_1_H(); void SET_1_L();void SET_1_HL();
+	void SET_2_A(); void SET_2_B(); void SET_2_C(); void SET_2_D();
+	void SET_2_E(); void SET_2_H(); void SET_2_L();void SET_2_HL();
+	void SET_3_A(); void SET_3_B(); void SET_3_C(); void SET_3_D();
+	void SET_3_E(); void SET_3_H(); void SET_3_L();void SET_3_HL();
+	void SET_4_A(); void SET_4_B(); void SET_4_C(); void SET_4_D();
+	void SET_4_E(); void SET_4_H(); void SET_4_L();void SET_4_HL();
+	void SET_5_A(); void SET_5_B(); void SET_5_C(); void SET_5_D();
+	void SET_5_E(); void SET_5_H(); void SET_5_L();void SET_5_HL();
+	void SET_6_A(); void SET_6_B(); void SET_6_C(); void SET_6_D();
+	void SET_6_E(); void SET_6_H(); void SET_6_L();void SET_6_HL();
+	void SET_7_A(); void SET_7_B(); void SET_7_C(); void SET_7_D();
+	void SET_7_E(); void SET_7_H(); void SET_7_L();void SET_7_HL();
 	//RL r
 	void RL_A(); void RL_B(); void RL_C(); void RL_D();
 	void RL_E(); void RL_H(); void RL_L(); void RL_HL();
@@ -297,4 +333,21 @@ private:
 	//SRL r
 	void SRL_A(); void SRL_B(); void SRL_C(); void SRL_D();
 	void SRL_E(); void SRL_H(); void SRL_L(); void SRL_HL();
+	//RLC
+	void RLC_A(); void RLC_B(); void RLC_C(); void RLC_D();
+	void RLC_E(); void RLC_H(); void RLC_L(); void RLC_HL();
+	//RRC
+	void RRC_A(); void RRC_B(); void RRC_C(); void RRC_D();
+	void RRC_E(); void RRC_H(); void RRC_L(); void RRC_HL();
+	//ADC
+	void ADC_A_A(); void ADC_A_B(); void ADC_A_C(); void ADC_A_D();
+	void ADC_A_E(); void ADC_A_H(); void ADC_A_L(); void ADC_A_d8();
+	void ADC_A_HL();
+	//SBC
+	void SBC_A_A(); void SBC_A_B();	void SBC_A_C(); void SBC_A_D();
+	void SBC_A_E(); void SBC_A_H(); void SBC_A_L(); void SBC_A_d8();
+	void SBC_A_HL();
+	//SWAP
+	void SWAP_A(); void SWAP_B(); void SWAP_C(); void SWAP_D();
+	void SWAP_E(); void SWAP_H(); void SWAP_L(); void SWAP_HL();
 };

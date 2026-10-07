@@ -64,7 +64,10 @@ private:
 	bool frameReady;
 
 	uint8_t framebuffer[WIDTH * HEIGHT];
+	uint8_t bgColourLine[160];
 
 	void renderScanline();
+	void renderBackgroundAndWindow();
+	void renderSprites();
 	uint16_t getTileAddress(uint8_t tile);
 };
