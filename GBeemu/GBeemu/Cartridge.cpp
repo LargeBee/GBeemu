@@ -51,6 +51,11 @@ bool Cartridge::loadROM(const std::string& path)
 	loadHeader();
 	allocateRAM();
 
+	savePath = path;
+	savePath.replace_extension(".sav");
+
+	loadSave();
+
 	return true;
 }
 
@@ -382,6 +387,19 @@ void Cartridge::writeROM(uint16_t address, uint8_t value)
 	}
 }
 
+void Cartridge::tickSave()
+{
+	if (!saveDirty)
+		return;
+
+	saveTimer++;
+
+	if (saveTimer >= SAVE_DELAY)
+	{
+		flushSave();
+	}
+}
+
 void Cartridge::writeRAM(uint16_t address, uint8_t value)
 {
 	if (!ramEnable)
@@ -395,8 +413,19 @@ void Cartridge::writeRAM(uint16_t address, uint8_t value)
 		uint16_t offset =
 			(address - 0xA000) & 0x01FF;
 
-		ram[offset] =
+		uint8_t newValue =
 			value & 0x0F;
+
+		if (ram[offset] != newValue)
+		{
+			ram[offset] = newValue;
+
+			if (hasBattery())
+			{
+				saveDirty = true;
+				saveTimer = 0;
+			}
+		}
 
 		return;
 	}
@@ -408,6 +437,17 @@ void Cartridge::writeRAM(uint16_t address, uint8_t value)
 	if (offset >= ram.size())
 		return;
 
+	if (ram[offset] != value)
+	{
+		ram[offset] = value;
+
+		if (hasBattery())
+		{
+			saveDirty = true;
+			saveTimer = 0;
+		}
+	}
+
 	ram[offset] = value;
 }
 
@@ -416,3 +456,73 @@ bool Cartridge::isLoaded() const
 	return !rom.empty();
 }
 
+bool Cartridge::hasBattery() const
+{
+	switch (cartridgeType)
+	{
+	case 0x03:
+	case 0x06:
+	case 0x09:
+	case 0x0D:
+	case 0x0F:
+	case 0x10:
+	case 0x13:
+	case 0x1B:
+	case 0x1E:
+	case 0x22:
+		return true;
+
+	default:
+		return false;
+	}
+}
+
+void Cartridge::loadSave()
+{
+	if (!hasBattery())
+		return;
+
+	if (ram.empty())
+		return;
+
+	if (savePath.empty())
+		return;
+
+	std::ifstream file(savePath, std::ios::binary);
+
+	if (!file)
+		return;
+
+	file.read(reinterpret_cast<char*>(ram.data()), ram.size());
+
+	saveDirty = false;
+	saveTimer = 0;
+}
+
+void Cartridge::flushSave()
+{
+	if (!hasBattery())
+		return;
+
+	if (!saveDirty)
+		return;
+
+	if (ram.empty())
+		return;
+
+	if (savePath.empty())
+		return;
+
+	std::ofstream file(savePath, std::ios::binary | std::ios::trunc);
+
+	if (!file)
+		return;
+
+	file.write(reinterpret_cast<const char*>(ram.data()), ram.size());
+
+	if (file)
+	{
+		saveDirty = false;
+		saveTimer = 0;
+	}
+}

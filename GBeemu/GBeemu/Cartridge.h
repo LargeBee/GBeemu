@@ -3,6 +3,7 @@
 #include <cstdint>
 #include <string>
 #include <vector>
+#include <filesystem>
 
 class Cartridge
 {
@@ -20,6 +21,12 @@ public:
 	uint8_t getROMSize() const;
 	uint8_t getRAMSize() const;
 
+	void loadSave();
+	void flushSave();
+	void tickSave();
+
+	bool hasBattery() const;
+
 private:
 	std::vector < uint8_t > rom;
 	std::vector < uint8_t > ram;
@@ -33,6 +40,13 @@ private:
 	uint16_t mbc5RomBank;
 
 	bool ramEnable;
+
+	std::filesystem::path savePath;
+
+	bool saveDirty = false;
+	uint32_t saveTimer = 0;
+
+	static constexpr uint32_t SAVE_DELAY = 60;
 
 	//MBC1
 	uint8_t romBankLow;

@@ -34,6 +34,8 @@ public:
 
 	void requestInterrupt(uint8_t bit);
 
+	void setPostBootState();
+
 private:
 	Cartridge& cartridge;
 

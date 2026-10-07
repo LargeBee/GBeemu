@@ -27,6 +27,8 @@ public:
 	void setSelect(bool pressed);
 	void setStart(bool pressed);
 
+	void setPostBootState();
+
 private:
 	Bus* bus;
 

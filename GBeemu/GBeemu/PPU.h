@@ -34,6 +34,8 @@ public:
 
 	uint8_t getLY() const;
 
+	void setPostBootState();
+
 private:
 	static constexpr int WIDTH = 160;
 	static constexpr int HEIGHT = 144;

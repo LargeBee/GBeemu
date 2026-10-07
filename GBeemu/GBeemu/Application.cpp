@@ -485,6 +485,13 @@ void Application::renderMenuBar()
 				emulator->reset();
 			}
 
+			if (ImGui::BeginMenu("Boot ROM"))
+			{
+				ImGui::Checkbox("Skip", &emulator->skipBootFlag);
+
+				ImGui::EndMenu();
+			}
+
 			ImGui::EndMenu();
 		}
 

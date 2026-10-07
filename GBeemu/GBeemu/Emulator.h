@@ -65,6 +65,10 @@ public:
 
 	Input& getInput();
 
+	void skipBootROM();
+
+	bool skipBootFlag;
+
 private:
 	Cartridge* cartridge;
 	Bus* bus;

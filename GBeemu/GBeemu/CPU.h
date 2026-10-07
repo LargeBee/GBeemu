@@ -49,6 +49,8 @@ public:
 	uint64_t getInstructionCount() const;
 
 	bool isStopped() const;
+
+	void setPostBootState();
 	
 private:
 	Emulator& emulator;

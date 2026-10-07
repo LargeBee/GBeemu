@@ -105,3 +105,8 @@ void Input::requestInterrupt()
 		interruptFlags
 	);
 }
+
+void Input::setPostBootState()
+{
+	reset();
+}

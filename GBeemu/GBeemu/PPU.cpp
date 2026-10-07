@@ -567,3 +567,27 @@ uint8_t PPU::getLY() const
 {
 	return ly;
 }
+
+void PPU::setPostBootState()
+{
+	lcdc = 0x91;
+	stat = 0x85;
+
+	scy = 0x00;
+	scx = 0x00;
+
+	ly = 0x00;
+	lyc = 0x00;
+
+	bgp = 0xFC;
+	obp0 = 0xFF;
+	obp1 = 0xFF;
+
+	wy = 0x00;
+	wx = 0x00;
+
+	modeClock = 0;
+	mode = MODE_OAM;
+
+	frameReady = false;
+}

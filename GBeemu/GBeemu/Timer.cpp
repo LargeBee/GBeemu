@@ -142,3 +142,12 @@ void Timer::write(uint16_t address, uint8_t value)
 		break;
 	}
 }
+
+void Timer::setPostBootState()
+{
+	tima = 0x00;
+	tma = 0x00;
+	tac = 0x00;
+
+	dividerCounter = 0xABCC;
+}

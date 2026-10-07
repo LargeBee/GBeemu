@@ -320,3 +320,11 @@ void Bus::disableBootROM()
 {
 	bootROMEnabled = false;
 }
+
+void Bus::setPostBootState()
+{
+	interruptFlags = 0xE1;
+	interruptEnable = 0x00;
+
+	bootROMEnabled = false;
+}

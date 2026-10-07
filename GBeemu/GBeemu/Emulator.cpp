@@ -15,6 +15,7 @@ Emulator::Emulator()
 {
 	cycles = 0;
 	running = false;
+	skipBootFlag = false;
 
 	cartridge = new Cartridge();
 	
@@ -45,6 +46,8 @@ Emulator::Emulator()
 
 Emulator::~Emulator()
 {
+	cartridge->flushSave();
+
 	delete cpu;
 	delete apu;
 	delete dma;
@@ -108,6 +111,11 @@ void Emulator::update()
 
 		stepInstruction();
 	}
+
+	if (isFrameReady())
+	{
+		cartridge->tickSave();
+	}
 }
 
 void Emulator::stepInstruction()
@@ -139,7 +147,7 @@ void Emulator::clearTrace()
 	trace.clear();
 }
 
-bool Emulator::runBoot()
+/*bool Emulator::runBoot()
 {
 	reset();
 
@@ -153,7 +161,7 @@ bool Emulator::runBoot()
 	running = true;
 
 	return true;
-}
+}*/
 
 void Emulator::run()
 {
@@ -237,16 +245,26 @@ uint64_t Emulator::getCycles() const
 
 bool Emulator::loadROM(const std::string& path)
 {
-	if (!cartridge->loadROM(path))
-		return false;
-
-	if (!bus->loadBootROM("dmg_boot.bin"))
-		return false;
+	cartridge->flushSave();
 
 	reset();
 
-	bus->enableBootROM();
+	if (!cartridge->loadROM(path))
+		return false;
 
+	if (skipBootFlag)
+	{
+		skipBoot();
+	}
+	else
+	{
+		if (!bus->loadBootROM("dmg_boot.bin"))
+		{
+			return false;
+		}
+		bus->enableBootROM();
+	}
+	
 	running = true;
 
 	return true;
@@ -275,4 +293,15 @@ uint64_t Emulator::getInstructionCount() const
 Input& Emulator::getInput()
 {
 	return *input;
+}
+
+void Emulator::skipBoot()
+{
+	cpu->setPostBootState();
+	ppu->setPostBootState();
+	timer->setPostBootState();
+	input->setPostBootState();
+	bus->setPostBootState();
+
+	bus->disableBootROM();
 }
