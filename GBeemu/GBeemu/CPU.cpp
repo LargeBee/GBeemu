@@ -6,7 +6,7 @@ CPU::CPU(Emulator& emulator, Bus& bus)
 	: emulator(emulator),
 	bus(bus)
 {
-	traceFile.open("trace.txt");
+	//traceFile.open("trace.txt");
 	reset();
 
 	buildInstructionTables();

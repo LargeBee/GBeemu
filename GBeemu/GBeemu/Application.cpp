@@ -99,6 +99,7 @@ bool Application::initialize()
 	ImGui::CreateContext();
 
 	ImGuiIO& io = ImGui::GetIO();
+	io.IniFilename = NULL;
 
 	io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
 
