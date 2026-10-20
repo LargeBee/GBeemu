@@ -6,7 +6,7 @@ Pause/Reset\
 Skip Boot Sequence\
 Scale screen 1-5x\
 Trace Viewer\
-Stats Viewer\
+Stats Viewer
 
 ### Planned Features (eventually)
 Saving and loading states\
@@ -15,4 +15,4 @@ Key Rebinding\
 Memory Viewer\
 Tile Viewer\
 Making better window layouts so you can view hardware information without it blocking the game area\
-Making the audio more accurate to hardware\
+Making the audio more accurate to hardware
