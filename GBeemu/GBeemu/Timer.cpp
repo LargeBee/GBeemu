@@ -29,15 +29,24 @@ void Timer::tick()
 		timerEnabled() &&
 		((dividerCounter >> bit) & 1);
 
+	bool oldAPUSignal = (dividerCounter & 0x1000) != 0;
+
 	dividerCounter++;
 
 	bool newSignal =
 		timerEnabled() &&
 		((dividerCounter >> bit) & 1);
 
+	bool newAPUSignal = (dividerCounter & 0x1000) != 0;
+
 	if (oldSignal && !newSignal)
 	{
 		incrementTIMA();
+	}
+
+	if (oldAPUSignal && !newAPUSignal)
+	{
+		pendingAPUClocks++;
 	}
 }
 
@@ -126,6 +135,9 @@ void Timer::write(uint16_t address, uint8_t value)
 	switch (address)
 	{
 	case 0xFF04:
+		if (dividerCounter & 0x1000)
+			pendingAPUClocks++;
+
 		dividerCounter = 0;
 		break;
 
@@ -150,4 +162,16 @@ void Timer::setPostBootState()
 	tac = 0x00;
 
 	dividerCounter = 0xABCC;
+}
+
+uint16_t Timer::getDividerCounter() const
+{
+	return dividerCounter;
+}
+
+uint32_t Timer::consumeAPUClocks()
+{
+	uint32_t count = pendingAPUClocks;
+	pendingAPUClocks = 0;
+	return count;
 }

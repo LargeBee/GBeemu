@@ -9,7 +9,9 @@
 #include "imgui_impl_sdl3.h"
 #include "imgui_impl_opengl3.h"
 
+
 class Emulator;
+#include "Audio.h"
 
 class Application
 {
@@ -44,6 +46,7 @@ private:
 	bool running;
 
 	Emulator* emulator;
+	Audio audio;
 
 	bool traceOpen;
 	bool statsOpen;

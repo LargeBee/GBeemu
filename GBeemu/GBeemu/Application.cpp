@@ -1,6 +1,7 @@
 #include "Application.h"
 #include "Emulator.h"
 #include "Input.h"
+#include "APU.h"
 
 
 Application::Application()
@@ -32,7 +33,7 @@ Application::~Application()
 
 bool Application::initialize()
 {
-	if (!SDL_Init(SDL_INIT_VIDEO))
+	if (!SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO))
 	{
 		SDL_Log(
 			"SDL_Init failed: %s",
@@ -41,6 +42,14 @@ bool Application::initialize()
 
 		return false;
 	}
+
+	if (!audio.initialize())
+	{
+		SDL_Log("Audio initialization failed");
+	}
+
+	//audio.playTestTone();
+
 
 	window = SDL_CreateWindow(
 		"GBeemu",
@@ -216,6 +225,8 @@ void Application::run()
 
 void Application::shutdown()
 {
+	audio.shutdown();
+
 	if (emulator)
 	{
 		delete emulator;
@@ -393,6 +404,21 @@ void Application::update()
 		emulator->clearFrameReady();
 
 		frameCount++;
+
+		APU& apu = emulator->getAPU();
+
+		const std::vector<float>& samples =
+			apu.getSampleBuffer();
+
+		if (!samples.empty())
+		{
+			audio.queueSamples(
+				samples.data(),
+				static_cast<uint32_t>(samples.size())
+			);
+
+			apu.clearSampleBuffer();
+		}
 	}
 }
 

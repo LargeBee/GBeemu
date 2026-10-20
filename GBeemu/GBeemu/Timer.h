@@ -19,6 +19,10 @@ public:
 
 	void setPostBootState();
 
+	uint16_t getDividerCounter() const;
+
+	uint32_t consumeAPUClocks();
+
 private:
 	Bus* bus;
 
@@ -33,4 +37,6 @@ private:
 	uint8_t timerBit() const;
 
 	void incrementTIMA();
+
+	uint32_t pendingAPUClocks = 0;
 };

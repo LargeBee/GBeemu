@@ -15,7 +15,7 @@ Emulator::Emulator()
 {
 	cycles = 0;
 	running = false;
-	skipBootFlag = false;
+	skipBootFlag = true;
 
 	cartridge = new Cartridge();
 	
@@ -93,7 +93,15 @@ void Emulator::tick()
 
 	timer->tick();
 	dma->tick();
-	//apu->tick();
+
+	uint32_t apuClocks = timer->consumeAPUClocks();
+
+	for (uint32_t i = 0; i < apuClocks; i++)
+	{
+		apu->clockFrameSequencer();
+	}
+
+	apu->tick();
 	input->tick();
 }
 
